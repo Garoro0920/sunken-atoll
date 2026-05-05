@@ -103,7 +103,7 @@ jobs:
 
       - name: Upload import log
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: godot-import-log
           path: import.log
@@ -150,7 +150,7 @@ jobs:
 
       - name: Upload test report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: gdunit4-report-${{ matrix.os }}
           path: reports/
@@ -193,7 +193,7 @@ jobs:
 
       - name: Upload artifact
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: smoke-build-linux
           path: build/dist/linux
