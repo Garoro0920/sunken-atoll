@@ -18,6 +18,15 @@ config/name="Sunken Atoll"
 config/description="Cooperative multiplayer survival in a flooded world. See specs/game_design_document.md."
 config/features=PackedStringArray("4.6")
 
+[autoload]
+
+; Singleton accessors. Names intentionally differ from the script
+; class_name to avoid the "hides an autoload singleton" parse error.
+; Game code accesses these via `WorldClock.get_hour()` etc.; tests
+; instantiate the underlying classes directly via `TimeOfDay.new()`.
+WorldClock="*res://src/core/world/time_of_day.gd"
+WorldWeather="*res://src/core/world/weather.gd"
+
 [display]
 
 window/size/viewport_width=1920
