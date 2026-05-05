@@ -1,40 +1,46 @@
 [gd_scene load_steps=5 format=3]
 
 [sub_resource type="Environment" id="Environment_diag"]
+; HIGH-CONTRAST diagnostic: pure black background + pure white ambient
+; at energy 2.0. If the renderer can draw any geometry at all, the box
+; below renders pure red against black — impossible to miss.
+; If the box does NOT appear, the issue is at the renderer / driver
+; layer (Compatibility renderer + ANGLE on Windows, GPU drivers, or
+; the Godot install itself) and is NOT a scene / lighting problem.
 background_mode = 1
-background_color = Color(0.2, 0.2, 0.25, 1)
-ambient_light_source = 1
-ambient_light_color = Color(0.8, 0.8, 0.85, 1)
-ambient_light_energy = 0.5
-tonemap_mode = 2
+background_color = Color(0, 0, 0, 1)
+ambient_light_source = 2
+ambient_light_color = Color(1, 1, 1, 1)
+ambient_light_energy = 2.0
+tonemap_mode = 0
+glow_enabled = false
 
 [sub_resource type="BoxMesh" id="BoxMesh_diag"]
-size = Vector3(1, 1, 1)
+size = Vector3(2, 2, 2)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_diag"]
-albedo_color = Color(0.8, 0.4, 0.3, 1)
+; Pure unshaded red. shading_mode=0 (UNSHADED) so the lighting setup
+; cannot mask a render failure.
+albedo_color = Color(1, 0, 0, 1)
+shading_mode = 0
 metallic = 0.0
-roughness = 0.6
+roughness = 1.0
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_diag"]
-size = Vector3(1, 1, 1)
+size = Vector3(2, 2, 2)
 
 [node name="MinimalDiagnostic" type="Node3D"]
 
-; Diagnostic scene: stripped of every Sprint-1 system. If THIS scene
-; flickers on the same machine, the issue is at the renderer / driver
-; level (try switching renderers in project.godot) rather than in any
-; demo logic.
+; HIGH-CONTRAST diagnostic scene. Run via F6 in the editor.
 ;
-; Run via: Project > Set Main Scene > minimal_diagnostic.tscn (or
-; double-click + F6 in the editor).
+; Expected if the renderer works: a solid red square fills most of the
+; viewport, on a pure black background.
+; If you see only black: rendering works but background only.
+; If you see anything else (e.g. sky-blue): the WorldEnvironment is not
+; being applied, or the editor is using a different scene.
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_diag")
-
-[node name="Sun" type="DirectionalLight3D" parent="."]
-transform = Transform3D(0.866, -0.354, 0.354, 0, 0.707, 0.707, -0.5, -0.612, 0.612, 0, 5, 0)
-light_energy = 1.0
 
 [node name="StaticBox" type="StaticBody3D" parent="."]
 
@@ -46,7 +52,10 @@ material_override = SubResource("StandardMaterial3D_diag")
 shape = SubResource("BoxShape3D_diag")
 
 [node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 4)
+; Camera at (0, 0, 5) looking straight at origin (-Z). Box (size 2)
+; centered at origin. Camera 5 m away, box edges at ±1 m, near plane
+; 0.1 m. Box should fill ~40% of viewport.
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 5)
 current = true
 fov = 70.0
 near = 0.1
