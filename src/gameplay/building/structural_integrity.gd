@@ -51,7 +51,10 @@ func unregister_node(node: FloatingNode) -> void:
 ## Returns the count of nodes that were newly marked unsupported.
 func recompute() -> int:
 	var reachable: Dictionary = {}
-	var stack: Array[NodePath] = _foundations.keys()
+	# Dictionary.keys() returns untyped Array; convert via assign() to keep
+	# the typed-array contract for stack.
+	var stack: Array[NodePath] = []
+	stack.assign(_foundations.keys())
 	while not stack.is_empty():
 		var current: NodePath = stack.pop_back()
 		if reachable.has(current):

@@ -30,6 +30,12 @@ uniform float foam_distance : hint_range(0.0, 5.0) = 0.6;
 uniform sampler2D foam_noise : hint_default_white;
 uniform float foam_noise_scale : hint_range(0.1, 10.0) = 4.0;
 
+// --- Depth texture (Godot 4.6+ requires explicit uniform with hint) ---
+// In earlier Godot 4 versions DEPTH_TEXTURE was an implicit built-in;
+// 4.6 removed that and now requires an explicit uniform declaration so
+// the engine can wire the screen-space depth attachment.
+uniform sampler2D DEPTH_TEXTURE : hint_depth_texture, filter_linear_mipmap;
+
 // --- Wave parameters (3 stacked Gerstner waves) ---
 uniform vec2 wave_dir_a = vec2(1.0, 0.0);
 uniform vec2 wave_dir_b = vec2(0.7, 0.7);

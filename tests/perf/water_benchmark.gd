@@ -1,4 +1,4 @@
-extends Node
+extends SceneTree
 
 ## Water shader benchmark.
 ## Per specs/epics/prototype_phase.md §4.4 — measures GPU/CPU cost of the
@@ -9,49 +9,58 @@ extends Node
 ##
 ## Output: JSON written to user://water_benchmark_<timestamp>.json so CI
 ## can ingest it (build/test_reports/perf/water.json).
+##
+## Note: extends SceneTree so it can be invoked with `-s` directly. This
+## avoids the "doesn't inherit from SceneTree or MainLoop" error that
+## occurred when extending Node.
 
 const TEST_SCENE := "res://scenes/prototypes/water/water_test.tscn"
 const PRESETS := ["shallow", "urban", "ruins", "deep"]
 const WARMUP_FRAMES := 60
-const MEASURE_FRAMES := 600  # ~10 seconds at 60 FPS
+const MEASURE_FRAMES := 600  # ~10 seconds at 60 FPS, less if uncapped
 
 var _scene_root: Node = null
 var _controller: Node = null
 var _results: Array = []
 
 
-func _ready() -> void:
+func _init() -> void:
+	# _init runs at startup. Defer the actual run so the SceneTree finishes
+	# wiring before we touch root / process_frame.
+	_run.call_deferred()
+
+
+func _run() -> void:
 	var packed: PackedScene = load(TEST_SCENE) as PackedScene
 	if packed == null:
 		push_error("Failed to load water test scene: %s" % TEST_SCENE)
-		quit_with_code(1)
+		quit(1)
 		return
 	_scene_root = packed.instantiate()
-	get_tree().root.add_child(_scene_root)
+	root.add_child(_scene_root)
 	_controller = _scene_root
 
 	for preset in PRESETS:
 		await _measure_preset(preset)
 	_write_report()
-	quit_with_code(0)
+	quit(0)
 
 
-func _measure_preset(name: String) -> void:
+func _measure_preset(preset_name: String) -> void:
 	if _controller.has_method("apply_preset"):
-		_controller.apply_preset(name)
+		_controller.apply_preset(preset_name)
 
 	# Warmup: shaders compile, GPU caches prime.
 	for i in WARMUP_FRAMES:
-		await get_tree().process_frame
+		await self.process_frame
 
 	var frame_times_ms: PackedFloat32Array = PackedFloat32Array()
-	var t0_msec := Time.get_ticks_usec()
-	var prev_msec := t0_msec
+	var prev_usec := Time.get_ticks_usec()
 	for i in MEASURE_FRAMES:
-		await get_tree().process_frame
-		var now_msec := Time.get_ticks_usec()
-		frame_times_ms.push_back(float(now_msec - prev_msec) / 1000.0)
-		prev_msec = now_msec
+		await self.process_frame
+		var now_usec := Time.get_ticks_usec()
+		frame_times_ms.push_back(float(now_usec - prev_usec) / 1000.0)
+		prev_usec = now_usec
 
 	var sorted := Array(frame_times_ms)
 	sorted.sort()
@@ -63,11 +72,11 @@ func _measure_preset(name: String) -> void:
 	var p99_index: int = int(float(sorted.size()) * 0.99)
 	var p99_ms := float(sorted[p99_index])
 
-	var avg_fps := 1000.0 / max(avg_ms, 0.001)
-	var one_pct_low_fps := 1000.0 / max(p99_ms, 0.001)
+	var avg_fps: float = 1000.0 / maxf(avg_ms, 0.001)
+	var one_pct_low_fps: float = 1000.0 / maxf(p99_ms, 0.001)
 
 	var entry := {
-		"preset": name,
+		"preset": preset_name,
 		"frames_measured": MEASURE_FRAMES,
 		"avg_frame_ms": avg_ms,
 		"p99_frame_ms": p99_ms,
@@ -75,6 +84,12 @@ func _measure_preset(name: String) -> void:
 		"one_percent_low_fps": one_pct_low_fps,
 	}
 	_results.append(entry)
+	print(
+		(
+			"  %s: avg %.2f ms (%.1f fps), 1%% low %.2f ms (%.1f fps)"
+			% [preset_name, avg_ms, avg_fps, p99_ms, one_pct_low_fps]
+		)
+	)
 
 
 func _write_report() -> void:
@@ -86,13 +101,16 @@ func _write_report() -> void:
 	var doc := {
 		"version": 1,
 		"scene": TEST_SCENE,
+		"renderer":
+		(
+			"opengl3"
+			if "opengl" in str(RenderingServer.get_video_adapter_name()).to_lower()
+			else "default"
+		),
+		"adapter": RenderingServer.get_video_adapter_name(),
 		"results": _results,
 	}
 	var json_text := JSON.stringify(doc, "\t")
 	f.store_string(json_text)
 	f.close()
 	print("Benchmark written to: %s" % path)
-
-
-func quit_with_code(code: int) -> void:
-	get_tree().quit(code)

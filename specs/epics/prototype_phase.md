@@ -2,12 +2,13 @@
 
 | 項目 | 内容 |
 |---|---|
-| 状態 | Draft(承認待ち) |
+| 状態 | **Archived 2026-05-05** — 統合判断 `pipeline/decisions/2026-05-05_prototype_phase_result.md` で完了、後続 `specs/epics/mvp_implementation.md` へ移行 |
 | 親 | `specs/game_design_document.md` §7、§8 |
 | 起票日 | 2026-05-05 |
-| 想定期間 | 4 週(2 スプリント想定、調整可) |
-| 関連決定 | `pipeline/decisions/2026-05-05_gdd_initial.md`、`pipeline/decisions/2026-05-05_version_proposal.md` |
+| 想定期間 | 4 週(本 Epic は 1 セッションで 3 プロト実測まで完了、フォロー 14 件は MVP Epic に移譲) |
+| 関連決定 | `pipeline/decisions/2026-05-05_gdd_initial.md`、`pipeline/decisions/2026-05-05_version_proposal.md`、`pipeline/decisions/2026-05-05_prototype_phase_result.md`(本 Epic の Resolves)、`pipeline/decisions/2026-05-05_water_proto_result.md`、`...floating_proto_result.md`、`...multiplayer_proto_result.md` |
 | 関連規約 | `docs/04_standards/quality_gates.md` §9、`docs/05_claude_code/task_decomposition_policy.md` |
+| 結論 | **GO**(MVP 実装移行承認、留保事項あり — 統合判断ログ参照) |
 
 ## 1. 目的
 
