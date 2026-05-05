@@ -159,22 +159,8 @@ func _try_place_at_cursor() -> void:
 	var forward: Vector3 = -player.global_transform.basis.z
 	var pos: Vector3 = player.global_position + forward * place_distance_m
 	var rot_y: float = player.rotation.y
-	# Sprint-1 placeholder factory: produces a bare FloatingNode + box
-	# collider so tests can exercise placement without scene-instancing.
-	# A later iteration will load the matching .tscn per definition.id.
-	var factory := func(_d: BuildingPartDefinition) -> Node3D:
-		var node: FloatingNode = FloatingNode.new()
-		node.displaced_volume = (_d.displaced_volume if _d.displaced_volume > 0.0 else 0.4)
-		node.sample_extents = (
-			_d.sample_extents
-			if _d.sample_extents.length_squared() > 0.0
-			else Vector3(0.4, 0.2, 0.4)
-		)
-		node.set_meta("definition", _d)
-		var col := CollisionShape3D.new()
-		var box := BoxShape3D.new()
-		box.size = _d.size_m
-		col.shape = box
-		node.add_child(col)
-		return node
+	# Production-shaped factory: PartFactory builds a visible StaticBody3D
+	# with a mesh, collision, and (for furniture / functional categories)
+	# the appropriate Interactable child.
+	var factory := func(d: BuildingPartDefinition) -> Node3D: return PartFactory.build(d)
 	building_placement.try_place(definition, pos, rot_y, factory)

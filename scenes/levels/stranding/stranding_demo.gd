@@ -31,12 +31,14 @@ const STARTER_KIT: Dictionary = {
 @onready var integrity: StructuralIntegrity = $StructuralIntegrity
 @onready var parts_root: Node3D = $Parts
 @onready var water_field: Node = $WaterField
+@onready var hud: DemoHud = $DemoHud
 
 
 func _ready() -> void:
 	_wire_systems()
 	if auto_grant_starter:
 		_grant_starter_inventory()
+	_wire_hud()
 
 
 func _wire_systems() -> void:
@@ -53,6 +55,25 @@ func _wire_systems() -> void:
 	# Player needs the water field so locomotion picks SWIM_SURFACE / DIVING
 	# when the body crosses the surface.
 	player.bind_dependencies(water_field, player.get_survival_manager())
+
+
+func _wire_hud() -> void:
+	if hud == null:
+		return
+	# Drive HUD from the systems' signals so PO can verify input
+	# without the engine console.
+	input.build_mode_changed.connect(hud.update_build_mode)
+	input.selected_part_changed.connect(hud.update_selected_part)
+	player.interactable_focused.connect(hud.update_interact_target)
+	player.interactable_lost.connect(func() -> void: hud.update_interact_target(null))
+	var inv: Inventory = player.get_inventory()
+	if inv != null:
+		inv.changed.connect(func() -> void: hud.update_inventory(inv))
+	# Initial sync.
+	hud.update_build_mode(input.build_mode_active)
+	hud.update_selected_part(input.get_selected_part_id())
+	hud.update_interact_target(player.get_focused_interactable())
+	hud.update_inventory(inv)
 
 
 func _grant_starter_inventory() -> void:

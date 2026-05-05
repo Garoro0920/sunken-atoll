@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3]
+[gd_scene load_steps=15 format=3]
 
 [ext_resource type="Script" path="res://scenes/levels/stranding/stranding_demo.gd" id="1_demo"]
 [ext_resource type="PackedScene" path="res://scenes/characters/player/player_character.tscn" id="2_player"]
@@ -7,6 +7,7 @@
 [ext_resource type="Script" path="res://scenes/prototypes/floating/water_field.gd" id="5_field"]
 [ext_resource type="Shader" path="res://resources/shaders/water/water_surface.gdshader" id="6_water_shader"]
 [ext_resource type="Resource" path="res://resources/materials/water/preset_shallow.tres" id="7_water_mat"]
+[ext_resource type="Script" path="res://scenes/levels/stranding/demo_hud.gd" id="8_hud"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sky"]
 sky_top_color = Color(0.5, 0.65, 0.85, 1)
@@ -77,3 +78,36 @@ snap_step_m = 1.0
 support_proximity_m = 5.0
 
 [node name="Parts" type="Node3D" parent="."]
+
+[node name="DemoHud" type="CanvasLayer" parent="."]
+script = ExtResource("8_hud")
+
+[node name="MarginContainer" type="MarginContainer" parent="DemoHud"]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -480.0
+offset_right = -16.0
+offset_top = 16.0
+offset_bottom = 200.0
+grow_horizontal = 0
+
+[node name="VBox" type="VBoxContainer" parent="DemoHud/MarginContainer"]
+layout_mode = 2
+
+[node name="BuildModeLabel" type="Label" parent="DemoHud/MarginContainer/VBox"]
+layout_mode = 2
+text = "Build mode: OFF [B]"
+
+[node name="SelectedPartLabel" type="Label" parent="DemoHud/MarginContainer/VBox"]
+layout_mode = 2
+text = "Selected: (none)"
+
+[node name="InteractLabel" type="Label" parent="DemoHud/MarginContainer/VBox"]
+layout_mode = 2
+text = "Look at: (nothing)   [E interact]"
+
+[node name="InventoryLabel" type="Label" parent="DemoHud/MarginContainer/VBox"]
+layout_mode = 2
+text = "Inventory: (none)"
+autowrap_mode = 3

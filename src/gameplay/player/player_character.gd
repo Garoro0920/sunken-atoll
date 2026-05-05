@@ -27,8 +27,12 @@ signal locomotion_state_changed(new_state: int)
 @export var inventory_path: NodePath
 @export var interact_origin_height_m: float = 1.0
 @export var interact_range_m: float = 2.5
-## Physics layer mask used for the interactable raycast.
-@export_flags_3d_physics var interact_layer_mask: int = 0b00100000  # default: layer 6
+## Physics layer mask used for the interactable raycast. Default scans
+## both the world layer (so we hit a part's StaticBody3D) and the
+## interactable layer (so we definitely catch it). The Interactable
+## itself is found by walking the collider's children — see
+## _find_interactable_in_collider.
+@export_flags_3d_physics var interact_layer_mask: int = 0b00001001  # layers 1 + 4
 ## Optional speed multiplier driven by SurvivalManager-derived modifiers
 ## (e.g. hunger penalty). Updated externally; defaults to 1.0.
 @export var speed_scale: float = 1.0
@@ -173,13 +177,28 @@ func _update_focused_interactable() -> void:
 	var hit: Dictionary = space_state.intersect_ray(query)
 	var new_focus: Node = null
 	if not hit.is_empty():
-		new_focus = hit.get("collider", null) as Node
+		var collider: Node = hit.get("collider", null) as Node
+		new_focus = _find_interactable_in_collider(collider)
 	if new_focus != _focused_interactable:
 		_focused_interactable = new_focus
 		if new_focus == null:
 			interactable_lost.emit()
 		else:
 			interactable_focused.emit(new_focus)
+
+
+## A part's StaticBody3D root carries an Interactable child (per
+## PartFactory). The raycast hits the StaticBody3D, so we walk one
+## level down to find the actual Interactable.
+func _find_interactable_in_collider(collider: Node) -> Interactable:
+	if collider == null:
+		return null
+	if collider is Interactable:
+		return collider as Interactable
+	for child in collider.get_children():
+		if child is Interactable:
+			return child as Interactable
+	return null
 
 
 ## Hook called by the input layer when the interact key is pressed.
