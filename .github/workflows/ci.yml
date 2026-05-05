@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6.0.2
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -71,7 +71,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6.0.2
         with:
           lfs: true
 
@@ -132,7 +132,7 @@ jobs:
         # MVP runs Linux only; expand to Windows once tests stabilize.
         os: [ubuntu-latest]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6.0.2
         with:
           lfs: true
 
@@ -166,7 +166,7 @@ jobs:
     timeout-minutes: 20
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6.0.2
         with:
           lfs: true
 
@@ -175,7 +175,7 @@ jobs:
         with:
           version: ${{ env.GODOT_VERSION }}
           use-dotnet: false
-          install-templates: true
+          include-templates: true
 
       - name: Headless import
         run: godot --headless --import
