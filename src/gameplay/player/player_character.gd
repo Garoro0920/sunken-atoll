@@ -21,6 +21,10 @@ signal locomotion_state_changed(new_state: int)
 ## Survival manager attached to this player. If null, locomotion still
 ## works but oxygen / temperature deltas don't propagate.
 @export var survival_manager_path: NodePath
+## Inventory child node — Interactables (storage, water_purifier) read
+## this via get_inventory(). Optional; null means craft / pick-up
+## mechanics are disabled for this player.
+@export var inventory_path: NodePath
 @export var interact_origin_height_m: float = 1.0
 @export var interact_range_m: float = 2.5
 ## Physics layer mask used for the interactable raycast.
@@ -40,6 +44,7 @@ var request_dive_up: bool = false
 # State seams that also let unit tests bind without a scene tree.
 var _water_field: Node = null
 var _survival: SurvivalManager = null
+var _inventory: Inventory = null
 var _state: int = PlayerLocomotion.LocomotionState.GROUND
 var _focused_interactable: Node = null
 
@@ -49,7 +54,18 @@ func _ready() -> void:
 		_water_field = get_node_or_null(water_field_path)
 	if not survival_manager_path.is_empty():
 		_survival = get_node_or_null(survival_manager_path) as SurvivalManager
+	if not inventory_path.is_empty():
+		_inventory = get_node_or_null(inventory_path) as Inventory
 	_resync_state()
+
+
+## Convenience accessors used by Interactables.
+func get_survival_manager() -> SurvivalManager:
+	return _survival
+
+
+func get_inventory() -> Inventory:
+	return _inventory
 
 
 ## Test seam: bind dependencies without going through scene-tree paths.
@@ -57,6 +73,11 @@ func bind_dependencies(water_field: Node, survival: SurvivalManager) -> void:
 	_water_field = water_field
 	_survival = survival
 	_resync_state()
+
+
+## Test seam: optionally bind an inventory after construction.
+func bind_inventory(inventory: Inventory) -> void:
+	_inventory = inventory
 
 
 func _physics_process(delta: float) -> void:

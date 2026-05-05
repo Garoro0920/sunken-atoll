@@ -1,6 +1,8 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://src/gameplay/player/player_character.gd" id="1_player"]
+[ext_resource type="Script" path="res://src/gameplay/survival/survival_manager.gd" id="2_survival"]
+[ext_resource type="Script" path="res://src/gameplay/inventory/inventory.gd" id="3_inventory"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
 radius = 0.4
@@ -12,6 +14,8 @@ height = 1.8
 
 [node name="PlayerCharacter" type="CharacterBody3D"]
 script = ExtResource("1_player")
+survival_manager_path = NodePath("SurvivalManager")
+inventory_path = NodePath("Inventory")
 interact_origin_height_m = 1.0
 interact_range_m = 2.5
 speed_scale = 1.0
@@ -23,3 +27,7 @@ mesh = SubResource("CapsuleMesh_body")
 shape = SubResource("CapsuleShape3D_body")
 
 [node name="SurvivalManager" type="Node" parent="."]
+script = ExtResource("2_survival")
+
+[node name="Inventory" type="Node" parent="."]
+script = ExtResource("3_inventory")
