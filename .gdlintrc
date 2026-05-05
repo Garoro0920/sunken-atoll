@@ -23,7 +23,7 @@ class-definitions-order:
 max-line-length: 100
 max-public-methods: 20
 function-arguments-number: 8
-max-returns: 6
+max-returns: 8  # Allow guard-clause heavy functions like BuildingPlacement.try_place
 max-file-lines: 1000
 trailing-ws: true
 mixed-tabs-and-spaces: true

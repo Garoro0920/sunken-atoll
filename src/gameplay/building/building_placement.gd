@@ -16,6 +16,12 @@ signal placement_rejected(reason: String, definition: BuildingPartDefinition)
 ## the placement still succeeds but no adjacency tracking happens.
 @export var integrity: StructuralIntegrity
 
+## Optional: inject an Inventory to gate placement on craft_cost. When
+## provided, try_place rejects if the inventory cannot afford the part
+## and consumes the cost atomically on success. When null, craft_cost
+## is ignored (useful for cheat / sandbox modes and tests).
+@export var inventory: Inventory
+
 ## Parent node where committed parts are added as children (e.g. the
 ## "Base" Node3D in a level scene).
 @export var parts_root: Node3D
@@ -58,10 +64,24 @@ func try_place(
 		_reject(definition, "max_per_base_exceeded")
 		return null
 
+	if inventory != null and not inventory.can_afford(definition.craft_cost):
+		_reject(definition, "insufficient_resources")
+		return null
+
 	var instance: Node3D = factory.call(definition) as Node3D
 	if instance == null:
 		_reject(definition, "factory_returned_null")
 		return null
+	# Deduct the cost only after the factory has produced a real node so
+	# we never charge for a placement that ultimately failed to spawn.
+	if inventory != null and not definition.craft_cost.is_empty():
+		# can_afford was true above; consume_cost is atomic and cannot
+		# fail unless something mutated the inventory mid-call. Treat
+		# any such race as a hard failure.
+		if not inventory.consume_cost(definition.craft_cost):
+			instance.queue_free()
+			_reject(definition, "race_consume_cost_failed")
+			return null
 	instance.position = snapped_pos
 	instance.rotation.y = rotation_y_rad
 	parts_root.add_child(instance)
