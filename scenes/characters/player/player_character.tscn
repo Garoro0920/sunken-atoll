@@ -37,22 +37,15 @@ script = ExtResource("3_inventory")
 script = ExtResource("4_input")
 
 [node name="Camera3D" type="Camera3D" parent="."]
-; 30-degree downward pitch (-basis.z = (0, -0.5, -0.866)), positioned
-; above-behind the player for an over-the-shoulder view.
-;
-; Note on .tscn Transform3D serialization: the 12 floats are stored
-; in ROW-MAJOR order (rows[0][0..2], rows[1][0..2], rows[2][0..2],
-; origin), NOT column-major. So to get basis.x = (1,0,0),
-; basis.y = (0, cos30, -sin30), basis.z = (0, sin30, cos30) for a
-; -30 deg X-axis pitch (look down), the serialized values are:
-;   row 0 = (basis.x.x, basis.y.x, basis.z.x) = (1, 0, 0)
-;   row 1 = (basis.x.y, basis.y.y, basis.z.y) = (0, 0.866, 0.5)
-;   row 2 = (basis.x.z, basis.y.z, basis.z.z) = (0, -0.5, 0.866)
-; Earlier transforms had the rows-vs-columns flipped, producing a
-; basis that pitched UP by mistake — the camera was staring at the
-; sky for the entire previous bug investigation.
-transform = Transform3D(1, 0, 0, 0, 0.866025, 0.5, 0, -0.5, 0.866025, 0, 5.0, 7.0)
+; First-person camera. Positioned at local (0, 0.6, 0) — eye height
+; inside the capsule (radius 0.4, height 1.8 centered on player origin).
+; Camera near plane (0.1) is closer than the capsule wall (0.4) and the
+; capsule mesh is back-face culled, so the camera sees through it.
+; Identity basis: looks at -Z initially; mouse-look pitches the camera
+; around its local X (PlayerCharacter.apply_mouse_look) and yaws the
+; whole player around world Y.
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
 current = true
-fov = 70.0
+fov = 75.0
 near = 0.1
 far = 500.0

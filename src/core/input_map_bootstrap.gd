@@ -26,6 +26,7 @@ const ACTIONS: Dictionary = {
 	&"build_place": KEY_F,
 	&"build_next": KEY_Q,
 	&"build_prev": KEY_Z,
+	&"mouse_release": KEY_ESCAPE,  # toggles mouse capture for the demo
 }
 
 

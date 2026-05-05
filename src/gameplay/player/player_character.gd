@@ -36,6 +36,16 @@ signal locomotion_state_changed(new_state: int)
 ## Optional speed multiplier driven by SurvivalManager-derived modifiers
 ## (e.g. hunger penalty). Updated externally; defaults to 1.0.
 @export var speed_scale: float = 1.0
+## Mouse-look — rotation per pixel of mouse motion. Tuned for the demo;
+## production will move this to a per-user settings resource.
+@export var mouse_sensitivity_rad_per_pixel: float = 0.003
+## Pitch clamps so the player can't somersault. Roughly ±80 degrees.
+@export var pitch_min_rad: float = -1.4
+@export var pitch_max_rad: float = 1.4
+## Path to the first-person camera (relative to this node). Resolved on
+## _ready into _camera; left null if the path doesn't resolve so unit
+## tests that build a PlayerCharacter without a camera still work.
+@export var camera_path: NodePath = NodePath("Camera3D")
 
 # Input intent — populated by a higher-level input layer; tests poke
 # these directly to drive _physics_process. Pubvars first per
@@ -51,6 +61,7 @@ var _survival: SurvivalManager = null
 var _inventory: Inventory = null
 var _state: int = PlayerLocomotion.LocomotionState.GROUND
 var _focused_interactable: Node = null
+var _camera: Camera3D = null
 
 
 func _ready() -> void:
@@ -60,7 +71,34 @@ func _ready() -> void:
 		_survival = get_node_or_null(survival_manager_path) as SurvivalManager
 	if not inventory_path.is_empty():
 		_inventory = get_node_or_null(inventory_path) as Inventory
+	if not camera_path.is_empty():
+		_camera = get_node_or_null(camera_path) as Camera3D
 	_resync_state()
+
+
+## First-person mouse-look. `delta_x` and `delta_y` are pixels of mouse
+## motion (typically from InputEventMouseMotion.relative). Rotates the
+## body around world Y for yaw and the camera around its local X for
+## pitch, with pitch clamped to [pitch_min_rad, pitch_max_rad].
+##
+## Public so PlayerInputController (or remote-input replays) can drive
+## look without depending on Godot's Input singleton.
+func apply_mouse_look(delta_x: float, delta_y: float) -> void:
+	rotate_y(-delta_x * mouse_sensitivity_rad_per_pixel)
+	if _camera == null:
+		return
+	var new_pitch: float = clampf(
+		_camera.rotation.x - delta_y * mouse_sensitivity_rad_per_pixel,
+		pitch_min_rad,
+		pitch_max_rad
+	)
+	_camera.rotation.x = new_pitch
+
+
+## Test seam: bind a Camera3D directly without going through scene-tree
+## paths. Production code resolves the camera in _ready.
+func bind_camera(camera: Camera3D) -> void:
+	_camera = camera
 
 
 ## Convenience accessors used by Interactables.

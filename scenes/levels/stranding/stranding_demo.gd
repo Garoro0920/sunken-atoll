@@ -39,6 +39,11 @@ func _ready() -> void:
 	if auto_grant_starter:
 		_grant_starter_inventory()
 	_wire_hud()
+	# Mouse capture only when this scene is the project's running main
+	# scene — guarded so the smoke test's add_child instantiation does
+	# not steal the editor mouse.
+	if get_tree().current_scene == self:
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 
 func _wire_systems() -> void:

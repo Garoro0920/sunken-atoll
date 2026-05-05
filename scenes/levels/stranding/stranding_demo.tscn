@@ -1,10 +1,11 @@
-[gd_scene load_steps=15 format=3]
+[gd_scene load_steps=12 format=3]
 
 [ext_resource type="Script" path="res://scenes/levels/stranding/stranding_demo.gd" id="1_demo"]
 [ext_resource type="PackedScene" path="res://scenes/characters/player/player_character.tscn" id="2_player"]
 [ext_resource type="Script" path="res://src/gameplay/building/building_placement.gd" id="3_placement"]
 [ext_resource type="Script" path="res://src/gameplay/building/structural_integrity.gd" id="4_integrity"]
 [ext_resource type="Script" path="res://scenes/prototypes/floating/water_field.gd" id="5_field"]
+[ext_resource type="ShaderMaterial" path="res://resources/materials/water/preset_shallow.tres" id="6_water_mat"]
 [ext_resource type="Script" path="res://scenes/levels/stranding/demo_hud.gd" id="8_hud"]
 
 [sub_resource type="Environment" id="Environment_main"]
@@ -27,20 +28,12 @@ tonemap_mode = 0
 glow_enabled = false
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_water"]
+; Subdivisions raised from 8 to 100 so vertex displacement (Gerstner
+; waves in water_surface.gdshader) produces visible deformation rather
+; than a flat plane with shifting normals.
 size = Vector2(200, 200)
-subdivide_width = 8
-subdivide_depth = 8
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_water"]
-; Plain opaque water for the Sprint 1 demo. The custom Gerstner-wave
-; shader (resources/shaders/water/water_surface.gdshader) had transparency
-; + DEPTH_TEXTURE-based depth fade that interacted poorly with Forward+
-; rendering, surfacing as full-screen flicker. The shader is preserved
-; for the prototype and for Sprint 2's water polish work; the demo uses
-; this simple material until the shader path is hardened.
-albedo_color = Color(0.18, 0.42, 0.55, 1)
-metallic = 0.0
-roughness = 0.45
+subdivide_width = 100
+subdivide_depth = 100
 
 [sub_resource type="BoxMesh" id="BoxMesh_island"]
 size = Vector3(8, 1, 8)
@@ -76,12 +69,15 @@ shadow_enabled = false
 script = ExtResource("5_field")
 
 [node name="WaterMesh" type="MeshInstance3D" parent="."]
-; Lowered to y=-0.5 (was -0.1). With the island top at y=0 and the box
-; physics depth tolerance, anything within ~0.2 m of the island top can
-; still surface flicker artifacts when the camera rakes the horizon.
+; Restored to the production Gerstner-wave shader via the preset_shallow
+; material. The earlier flicker that drove a fallback to a plain
+; StandardMaterial3D was traced to the Forward+ renderer + transparent
+; depth-fade combination; under the Compatibility renderer (and with
+; the HUD-on-CanvasLayer issue resolved separately), the shader runs
+; cleanly. y=-0.5 keeps the surface a half meter under the island top.
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
 mesh = SubResource("PlaneMesh_water")
-material_override = SubResource("StandardMaterial3D_water")
+material_override = ExtResource("6_water_mat")
 
 [node name="Island" type="StaticBody3D" parent="."]
 

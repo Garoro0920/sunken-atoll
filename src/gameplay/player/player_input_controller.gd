@@ -29,6 +29,7 @@ const ACTION_BUILD_TOGGLE := &"build_toggle"
 const ACTION_BUILD_PLACE := &"build_place"
 const ACTION_BUILD_NEXT := &"build_next"
 const ACTION_BUILD_PREV := &"build_prev"
+const ACTION_MOUSE_RELEASE := &"mouse_release"
 
 @export var player: PlayerCharacter
 @export var building_placement: BuildingPlacement
@@ -37,6 +38,12 @@ const ACTION_BUILD_PREV := &"build_prev"
 ## Override the part palette for tests / prototypes; defaults to the
 ## full T1 catalog when empty.
 @export var available_parts: Array[StringName] = []
+## When true, _input forwards mouse motion to player.apply_mouse_look
+## while the OS mouse is captured, and toggles capture on ESC / click.
+## Tests leave this true (it's a no-op without simulated mouse events)
+## but disable mouse capture by leaving the demo's _enable_mouse_look()
+## un-called.
+@export var mouse_look_enabled: bool = true
 
 var build_mode_active: bool = false
 var selected_part_index: int = 0
@@ -55,6 +62,29 @@ func _ready() -> void:
 		var parent: Node = get_parent()
 		if parent is PlayerCharacter:
 			player = parent as PlayerCharacter
+
+
+## _input runs only when there's an actual input event, so unit tests
+## (which never simulate InputEventMouseMotion / KEY_ESCAPE) are
+## unaffected. Production drives this from the Godot input pipeline.
+func _input(event: InputEvent) -> void:
+	if not mouse_look_enabled or player == null:
+		return
+	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+		var motion: InputEventMouseMotion = event
+		player.apply_mouse_look(motion.relative.x, motion.relative.y)
+		return
+	if event.is_action_pressed(ACTION_MOUSE_RELEASE):
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+		get_viewport().set_input_as_handled()
+		return
+	if (
+		event is InputEventMouseButton
+		and (event as InputEventMouseButton).pressed
+		and Input.mouse_mode == Input.MOUSE_MODE_VISIBLE
+	):
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+		get_viewport().set_input_as_handled()
 
 
 func _process(_delta: float) -> void:

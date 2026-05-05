@@ -116,3 +116,50 @@ func test_request_jump_consumed_after_tick() -> void:
 	player.request_jump = true
 	player.step_for_test(0.016)
 	assert_bool(player.request_jump).is_false()
+
+
+func test_apply_mouse_look_yaw_rotates_player_body() -> void:
+	var player := _make_player()
+	# delta_x positive -> rotate right -> rotation.y goes negative.
+	player.apply_mouse_look(100.0, 0.0)
+	var expected_yaw: float = -100.0 * player.mouse_sensitivity_rad_per_pixel
+	assert_float(player.rotation.y).is_equal_approx(expected_yaw, 1e-5)
+
+
+func test_apply_mouse_look_no_camera_is_safe_yaw_only() -> void:
+	var player := _make_player()
+	# No camera bound; yaw still applies, pitch is silently skipped.
+	player.apply_mouse_look(50.0, 80.0)
+	var expected_yaw: float = -50.0 * player.mouse_sensitivity_rad_per_pixel
+	assert_float(player.rotation.y).is_equal_approx(expected_yaw, 1e-5)
+
+
+func test_apply_mouse_look_pitch_clamped_at_min() -> void:
+	var player := _make_player()
+	var cam := Camera3D.new()
+	player.add_child(cam)
+	player.bind_camera(cam)
+	# Drive a huge downward mouse motion; pitch should saturate at min.
+	player.apply_mouse_look(0.0, 100000.0)
+	assert_float(cam.rotation.x).is_equal_approx(player.pitch_min_rad, 1e-5)
+
+
+func test_apply_mouse_look_pitch_clamped_at_max() -> void:
+	var player := _make_player()
+	var cam := Camera3D.new()
+	player.add_child(cam)
+	player.bind_camera(cam)
+	player.apply_mouse_look(0.0, -100000.0)
+	assert_float(cam.rotation.x).is_equal_approx(player.pitch_max_rad, 1e-5)
+
+
+func test_apply_mouse_look_pitch_accumulates_within_range() -> void:
+	var player := _make_player()
+	var cam := Camera3D.new()
+	player.add_child(cam)
+	player.bind_camera(cam)
+	# Two small motions: cumulative pitch = -delta_y_total * sensitivity.
+	player.apply_mouse_look(0.0, 50.0)
+	player.apply_mouse_look(0.0, 30.0)
+	var expected: float = -80.0 * player.mouse_sensitivity_rad_per_pixel
+	assert_float(cam.rotation.x).is_equal_approx(expected, 1e-5)
