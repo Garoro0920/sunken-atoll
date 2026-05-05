@@ -24,7 +24,7 @@ import sys
 
 from .clients.meshy import MeshyClient
 from .clients.tripo import TripoClient
-from .common import load_dotenv_if_present
+from .common import is_dry_run, load_dotenv_if_present
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -45,11 +45,34 @@ def main(argv: list[str] | None = None) -> int:
         "--dry-run", action="store_true",
         help="Force DRY_RUN=true for this invocation (no HTTP, no credit).",
     )
+    parser.add_argument(
+        "--live", action="store_true",
+        help=(
+            "Force a real API call by clearing DRY_RUN before dispatch. "
+            "Required when .env contains DRY_RUN=true (the safe default)."
+        ),
+    )
     args = parser.parse_args(argv)
+
+    if args.dry_run and args.live:
+        parser.error("--dry-run and --live are mutually exclusive")
 
     load_dotenv_if_present()
     if args.dry_run:
         os.environ["DRY_RUN"] = "true"
+    if args.live:
+        os.environ["DRY_RUN"] = "false"
+
+    mode = "DRY_RUN (no HTTP, no credit consumed)" if is_dry_run() else "LIVE — real API call, will consume Pro-plan credit"
+    print(f"[mode: {mode}]")
+    print(f"  service={args.service} kind={args.kind} asset_id={args.asset_id}")
+    print(f"  prompt={args.prompt!r}")
+    if not is_dry_run():
+        # Live calls block here for ~1 second so the user sees the banner
+        # and can Ctrl-C if it was unintentional. Cheaper than reading a
+        # surprise 0.05-USD line item later.
+        import time
+        time.sleep(1)
 
     client = TripoClient() if args.service == "tripo" else MeshyClient()
     result = client.generate_text_to_model(
