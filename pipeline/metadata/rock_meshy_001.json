@@ -2,23 +2,26 @@
   "id": "rock_meshy_001",
   "kind": "rock",
   "service": "meshy",
-  "model": "meshy:text-to-3d:preview",
+  "model": "meshy:text-to-3d:preview+refine",
   "prompt": "weathered sea boulder, granite, cracked surface",
   "seed": null,
-  "parameters": {},
+  "parameters": {
+    "refine": true,
+    "enable_pbr": true
+  },
   "license": "Meshy Pro plan terms — see docs/02_services/meshy.md §7",
   "attribution": null,
-  "generated_at": "2026-05-05T13:49:35+00:00",
+  "generated_at": "2026-05-05T14:14:06+00:00",
   "input_files": [],
   "output_files": [
     "assets/raw/rock/rock_meshy_001.glb"
   ],
   "checksum": {
     "algorithm": "sha256",
-    "value": "f70a3d6c700e1c5908909da153476b4bd2af008f7723b11f3b332cf4584dc762",
-    "bytes": 15264144
+    "value": "ea9f83c8484d813f013d177129f95d0521d56788accca08adae932fd3b97b600",
+    "bytes": 25721036
   },
-  "request_id": "0520cf88a5d8475ba82bcc9289414145",
-  "job_id": "019df865-4cc8-7204-b8d3-fbc32bfe2699",
+  "request_id": "c94ea08373b54d8e820bd77201c2128e",
+  "job_id": "019df879-8c18-7ff4-a8fd-d8028a0f7026->019df87a-cd7d-7710-bac5-b3a946788292",
   "cost_estimate_usd": null
 }
