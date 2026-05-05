@@ -4,13 +4,18 @@
 
 [resource]
 shader = ExtResource("1_shader")
-shader_parameter/deep_color = Color(0.10, 0.45, 0.55, 1.0)
-shader_parameter/shallow_color = Color(0.45, 0.85, 0.90, 0.65)
+; Tone-down pass after the demo flagged the previous values as
+; "全体的に明るすぎる". Albedo (deep/shallow) lowered ~50%, roughness
+; raised slightly to soften specular highlights, fresnel softened a
+; touch so glancing-angle rims are less blown out. The relative
+; deep-vs-shallow contrast is preserved so the depth fade still reads.
+shader_parameter/deep_color = Color(0.04, 0.18, 0.25, 1.0)
+shader_parameter/shallow_color = Color(0.20, 0.45, 0.52, 0.85)
 shader_parameter/depth_fade_distance = 4.0
-shader_parameter/roughness_base = 0.04
+shader_parameter/roughness_base = 0.10
 shader_parameter/metallic_base = 0.0
-shader_parameter/fresnel_power = 5.0
-shader_parameter/foam_color = Color(1.0, 1.0, 1.0, 1.0)
+shader_parameter/fresnel_power = 4.0
+shader_parameter/foam_color = Color(0.85, 0.88, 0.90, 1.0)
 shader_parameter/foam_distance = 0.7
 shader_parameter/foam_noise_scale = 4.0
 shader_parameter/wave_dir_a = Vector2(1.0, 0.0)
