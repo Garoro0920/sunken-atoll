@@ -90,8 +90,14 @@ jobs:
       - name: Fail on import warnings
         run: |
           # Per quality_gates.md §9.1 リンタ警告許容 0 (intent: import warnings = 0).
-          if grep -E "(WARNING|ERROR)" import.log | grep -v "Could not load resource at path \"\"" ; then
-            echo "::error::Godot import produced warnings/errors. See import.log."
+          # Filter out expected CI-only warnings:
+          #   - empty resource path placeholder
+          #   - editor plugins (e.g. GdUnit4) intentionally absent in CI
+          #     (addons/ is gitignored; CI test job downloads its own copy)
+          if grep -E "(WARNING|ERROR)" import.log \
+              | grep -v 'Could not load resource at path ""' \
+              | grep -v "Addon 'res://addons/" ; then
+            echo "::error::Godot import produced unexpected warnings/errors. See import.log."
             exit 1
           fi
 
