@@ -117,6 +117,15 @@ jobs:
     needs: [import]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
+    # gdunit4-action publishes JUnit reports as a GitHub check run via
+    # dorny/test-reporter, which needs `checks: write`. Without this
+    # block the test step succeeds but the action's reporting sub-step
+    # fails with HttpError (Resource not accessible by integration).
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
+      actions: read
     strategy:
       fail-fast: false
       matrix:
