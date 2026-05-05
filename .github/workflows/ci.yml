@@ -135,7 +135,9 @@ jobs:
           paths: 'res://tests/unit,res://tests/integration'
           report-name: gdunit4-report-${{ matrix.os }}
           retries: 0
-          arguments: '--continue-on-failure'
+          # Note: gdunit4-action auto-injects --continue.
+          # Avoid passing extra GdUnit CLI flags here unless a specific
+          # need arises; v6.1.x's CLI is stricter than v5.x.
 
       - name: Upload test report
         if: always()
