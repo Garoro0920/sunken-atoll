@@ -1,0 +1,36 @@
+# gdlint configuration for Sunken Atoll
+# Per docs/04_standards/coding_standards.md §3.
+
+# Naming conventions (per docs/04_standards/naming_conventions.md §5)
+function-name: '(_on_([a-z][a-z0-9]*_)*[a-z][a-z0-9]*|_?[a-z][a-z0-9]*(_[a-z0-9]+)*)$'
+function-preload-variable-name: '[A-Z][a-zA-Z0-9]*$'
+class-definitions-order:
+  - tools
+  - classnames
+  - extends
+  - docstrings
+  - signals
+  - enums
+  - consts
+  - exports
+  - pubvars
+  - prvvars
+  - onreadypubvars
+  - onreadyprvvars
+  - others
+
+# Style
+max-line-length: 100
+max-public-methods: 20
+function-arguments-number: 8
+max-returns: 6
+max-file-lines: 1000
+trailing-ws: true
+mixed-tabs-and-spaces: true
+no-elif-return: true
+no-else-return: true
+
+# Disabled rules (rationale documented inline)
+disable:
+  - duplicated-load
+  # Reason: Godot 4 idioms occasionally repeat preload paths intentionally.

@@ -1,0 +1,24 @@
+# gitleaks configuration for Sunken Atoll
+# Per docs/02_services/secrets_management.md and quality_gates.md §9.1.
+# Uses default ruleset and adds project-specific allowlist for documentation
+# files that legitimately list environment variable NAMES (not values).
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Documentation that names secret env vars without values"
+paths = [
+  '''^docs/02_services/secrets_management\.md$''',
+  '''^\.env\.example$''',
+  '''^pipeline/decisions/.*\.md$''',
+]
+
+[[allowlists]]
+description = "Test fixtures with placeholder values"
+paths = [
+  '''^tests/.*$''',
+]
+regexes = [
+  '''(?i)(test|fake|dummy|placeholder|example)[-_]?(api|key|token|secret)''',
+]

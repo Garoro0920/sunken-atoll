@@ -1,0 +1,44 @@
+; Engine configuration file.
+;
+; Project configuration is intentionally minimal here.
+; - The exact engine version is fixed at the CI / dev tooling layer
+;   per docs/02_services/version_policy.md (NOT in this file).
+; - Renderer / physics / quality settings will be set after the
+;   technology selection ADR is recorded (see specs/game_design_document.md §9).
+
+config_version=5
+
+[application]
+
+config/name="Sunken Atoll"
+config/description="Cooperative multiplayer survival in a flooded world. See specs/game_design_document.md."
+config/features=PackedStringArray("4.0")
+run/main_scene=""
+
+[autoload]
+
+; Autoloads (singletons) will be added per docs/04_standards/scene_standards.md §9.
+; Examples planned: EventBus, GameState, SceneRouter, AudioMaster, Logger.
+
+[display]
+
+window/size/viewport_width=1920
+window/size/viewport_height=1080
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+
+[rendering]
+
+; Renderer selection is deferred to the prototyping phase.
+; See specs/features/water_shader.md §7 (Forward+ vs Mobile decision).
+
+[physics]
+
+; Physics engine selection is deferred to the prototyping phase.
+; Candidate: Jolt (see specs/game_design_document.md §7.5).
+common/physics_ticks_per_second=60
+3d/physics_engine="DEFAULT"
+
+[input]
+
+; Input map will be defined under resources/input_maps/ per docs/04_standards/scene_standards.md.

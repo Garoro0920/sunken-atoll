@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://src/gameplay/building/floating_node.gd" id="1_floatnode"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_block"]
+size = Vector3(1, 0.4, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_block"]
+size = Vector3(1, 0.4, 1)
+
+[node name="FloatingBlock" type="RigidBody3D"]
+script = ExtResource("1_floatnode")
+displaced_volume = 0.4
+sample_extents = Vector3(0.5, 0.2, 0.5)
+
+[node name="Mesh" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_block")
+
+[node name="Collider" type="CollisionShape3D" parent="."]
+shape = SubResource("BoxShape3D_block")

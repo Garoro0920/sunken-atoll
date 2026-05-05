@@ -1,0 +1,58 @@
+SUNKEN ATOLL — PROPRIETARY LICENSE
+
+Copyright (c) 2026 [Copyright Holder TBD]
+
+All Rights Reserved.
+
+This software, including its source code, scenes, scripts, configurations,
+art, audio, design documents, and all other contents in this repository
+(collectively, the "Project"), is the proprietary work of the copyright
+holder identified above. The Project is provided for the copyright holder's
+internal development purposes only.
+
+No license, express or implied, is granted to any person to use, copy,
+modify, merge, publish, distribute, sublicense, sell, host, perform,
+display, decompile, reverse-engineer, or create derivative works of the
+Project, in whole or in part, except as expressly permitted in a separate
+written agreement signed by the copyright holder.
+
+Unauthorized use is strictly prohibited and may violate applicable
+copyright, trademark, trade secret, and other laws.
+
+================================================================================
+THIRD-PARTY COMPONENTS
+================================================================================
+
+The Project incorporates open-source software, third-party libraries,
+generated assets, and pre-made assets that are governed by their own
+respective licenses. Those components remain subject to their original
+license terms, NOT this proprietary license.
+
+Authoritative records of third-party component licenses, attributions,
+and provenance metadata for generated assets are maintained at:
+
+  - localization/credits.md
+  - pipeline/metadata/<id>.json (per generated asset)
+  - docs/07_governance/licensing.md (policy)
+  - docs/07_governance/ip_policy.md (intellectual property handling)
+
+================================================================================
+PLACEHOLDER NOTICE
+================================================================================
+
+The "[Copyright Holder TBD]" placeholder above MUST be replaced with the
+legal entity or individual that holds copyright before any external
+distribution (including private alpha/beta releases). Replacement requires
+PO approval and a Decision Log entry under pipeline/decisions/.
+
+================================================================================
+NO WARRANTY
+================================================================================
+
+THE PROJECT IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL
+THE COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY,
+WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT
+OF, OR IN CONNECTION WITH THE PROJECT OR THE USE OR OTHER DEALINGS IN THE
+PROJECT.

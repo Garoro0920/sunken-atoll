@@ -1,0 +1,184 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+env:
+  # Per docs/02_services/version_policy.md §9.1
+  GODOT_VERSION: 4.6.2
+  GDUNIT4_VERSION: v5.0.4
+  PYTHON_VERSION: '3.12'
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ----------------------------------------------------------------------------
+  # Job 1: Lint & format checks (fast, runs on every change)
+  # ----------------------------------------------------------------------------
+  lint:
+    name: Lint and format
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install gdtoolkit
+        run: pip install 'gdtoolkit>=4.3,<5'
+
+      - name: gdformat (check only)
+        run: |
+          if find src tests -name '*.gd' -print -quit | grep -q .; then
+            gdformat --check --line-length 100 src tests
+          else
+            echo "No .gd files yet — skipping."
+          fi
+
+      - name: gdlint
+        run: |
+          if find src tests -name '*.gd' -print -quit | grep -q .; then
+            gdlint src tests
+          else
+            echo "No .gd files yet — skipping."
+          fi
+
+      - name: Markdown lint
+        uses: DavidAnson/markdownlint-cli2-action@v18
+        with:
+          globs: |
+            **/*.md
+            !node_modules
+            !build
+
+      - name: Secret scan (gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ----------------------------------------------------------------------------
+  # Job 2: Godot import validation (warnings = errors per quality_gates §9.1)
+  # ----------------------------------------------------------------------------
+  import:
+    name: Godot import validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Set up Godot
+        uses: chickensoft-games/setup-godot@v2
+        with:
+          version: ${{ env.GODOT_VERSION }}
+          use-dotnet: false
+
+      - name: Headless import
+        run: |
+          # First import populates the .godot cache; second pass surfaces warnings deterministically.
+          godot --headless --import || true
+          godot --headless --import 2>&1 | tee import.log
+
+      - name: Fail on import warnings
+        run: |
+          # Per quality_gates.md §9.1 リンタ警告許容 0 (intent: import warnings = 0).
+          if grep -E "(WARNING|ERROR)" import.log | grep -v "Could not load resource at path \"\"" ; then
+            echo "::error::Godot import produced warnings/errors. See import.log."
+            exit 1
+          fi
+
+      - name: Upload import log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: godot-import-log
+          path: import.log
+          retention-days: 14
+
+  # ----------------------------------------------------------------------------
+  # Job 3: GdUnit4 unit + integration tests
+  # ----------------------------------------------------------------------------
+  test:
+    name: GdUnit4 (${{ matrix.os }})
+    needs: [import]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        # MVP runs Linux only; expand to Windows once tests stabilize.
+        os: [ubuntu-latest]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Run GdUnit4
+        uses: MikeSchulze/gdUnit4-action@v1
+        with:
+          godot-version: ${{ env.GODOT_VERSION }}
+          version: ${{ env.GDUNIT4_VERSION }}
+          paths: 'res://tests/unit,res://tests/integration'
+          report-name: gdunit4-report-${{ matrix.os }}
+          retries: 0
+          arguments: '--continue-on-failure'
+
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gdunit4-report-${{ matrix.os }}
+          path: reports/
+          retention-days: 30
+
+  # ----------------------------------------------------------------------------
+  # Job 4: Smoke build (Linux only on PR; full matrix on main)
+  # ----------------------------------------------------------------------------
+  build_smoke:
+    name: Smoke build (Linux)
+    needs: [import]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Set up Godot with templates
+        uses: chickensoft-games/setup-godot@v2
+        with:
+          version: ${{ env.GODOT_VERSION }}
+          use-dotnet: false
+          install-templates: true
+
+      - name: Headless import
+        run: godot --headless --import
+
+      - name: Export Linux/X11 (placeholder preset)
+        run: |
+          mkdir -p build/dist/linux
+          # Preset name must exist in export_presets.cfg (added in a later task).
+          # For now, this step is informational and will be enabled when the preset is defined.
+          if grep -q '\[preset.0\]' export_presets.cfg 2>/dev/null; then
+            godot --headless --export-release "Linux/X11" build/dist/linux/sunken_atoll.x86_64
+          else
+            echo "::warning::No export_presets.cfg yet — smoke build skipped. Add presets per docs/03_workflows/build_release_workflow.md §4."
+          fi
+
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-build-linux
+          path: build/dist/linux
+          retention-days: 14
+          if-no-files-found: ignore

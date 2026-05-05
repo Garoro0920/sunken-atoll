@@ -1,0 +1,47 @@
+# Godot 4 imported assets cache
+.godot/
+
+# Godot translation binaries (auto-generated from .csv)
+*.translation
+
+# Mono / .NET artifacts (only relevant if C# is adopted)
+.mono/
+data_*/
+*.csproj.user
+mono_crash.*.json
+
+# Local export credentials (must never be committed)
+export_credentials.cfg
+
+# CI / build outputs (per docs/01_architecture/directory_structure.md §5)
+build/
+
+# Local secrets and environment overrides (per docs/02_services/secrets_management.md)
+.env
+.env.local
+.envrc
+
+# OS metadata
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor state
+.idea/
+.vscode/
+*.swp
+*~
+
+# Backup / temp files
+*.bak
+*.tmp
+*.import.bak
+
+# Python venvs (if pipeline scripts use Python)
+.venv/
+__pycache__/
+*.pyc
+
+# Node dependencies (if MCP or distribution scripts use Node)
+node_modules/
+.pnp.*
