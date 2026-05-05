@@ -1,0 +1,66 @@
+[gd_scene load_steps=5 format=3]
+
+; Bisect scene: stranding_demo with EVERYTHING REMOVED except the
+; environment, sun, island, and a known-good camera.
+;
+; If this renders the gray island on sky-blue background, the cause
+; of the "sky-blue only" symptom in stranding_demo.tscn is one of the
+; nodes we removed (Player, WaterMesh, BuildingPlacement, DemoHud, etc.)
+; — add them back one at a time to identify the culprit.
+;
+; If this does NOT render the island, the cause is in the environment /
+; sun / camera or one of the autoloads (WorldClock / WorldWeather /
+; InputMapBootstrap) which run for every scene.
+
+[sub_resource type="Environment" id="Environment_min"]
+background_mode = 1
+background_color = Color(0.55, 0.7, 0.85, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.85, 0.87, 0.92, 1)
+ambient_light_energy = 0.7
+tonemap_mode = 0
+glow_enabled = false
+
+[sub_resource type="BoxMesh" id="BoxMesh_island"]
+size = Vector3(8, 1, 8)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_island"]
+; Bright orange so it is impossible to miss against the sky-blue background.
+albedo_color = Color(1, 0.5, 0.1, 1)
+shading_mode = 0
+metallic = 0.0
+roughness = 1.0
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_island"]
+size = Vector3(8, 1, 8)
+
+[node name="StrandingMinimal" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_min")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.707107, -0.707107, 0, 0.707107, 0.707107, 0, 30, 0)
+light_energy = 1.5
+shadow_enabled = false
+
+[node name="Island" type="StaticBody3D" parent="."]
+
+[node name="IslandMesh" type="MeshInstance3D" parent="Island"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+mesh = SubResource("BoxMesh_island")
+material_override = SubResource("StandardMaterial3D_island")
+
+[node name="IslandCollider" type="CollisionShape3D" parent="Island"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+shape = SubResource("BoxShape3D_island")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+; Identity-basis camera, elevated and pulled back so the entire 8x1x8
+; island is in view. Looking straight at -Z. Same camera setup that
+; works in minimal_diagnostic.tscn.
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4, 15)
+current = true
+fov = 70.0
+near = 0.1
+far = 500.0
