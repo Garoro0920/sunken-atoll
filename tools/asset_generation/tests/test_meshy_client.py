@@ -100,6 +100,76 @@ def test_wait_for_completion_raises_on_canceled() -> None:
         client.wait_for_completion("tid")
 
 
+def test_submit_refine_uses_preview_task_id_and_enables_pbr() -> None:
+    session = MagicMock()
+    session.post.return_value = _make_response(payload={"result": "refine-id"})
+    client = MeshyClient(api_key="k", session=session)
+    refine_id = client.submit_text_to_3d_refine("preview-id-123")
+    assert refine_id == "refine-id"
+
+    _, kwargs = session.post.call_args
+    body = kwargs["json"]
+    assert body["mode"] == "refine"
+    assert body["preview_task_id"] == "preview-id-123"
+    assert body["enable_pbr"] is True
+
+
+def test_generate_chains_preview_then_refine(tmp_path, monkeypatch) -> None:
+    """Default flow: submit preview, wait, submit refine, wait, download."""
+    monkeypatch.setattr(common, "ASSETS_RAW_DIR", tmp_path / "raw")
+    monkeypatch.setattr(common, "API_CALLS_DIR", tmp_path / "calls")
+    monkeypatch.setattr(common, "METADATA_DIR", tmp_path / "meta")
+    monkeypatch.delenv("DRY_RUN", raising=False)
+
+    session = MagicMock()
+    # Two POSTs (preview submit, refine submit), then GETs while polling.
+    session.post.side_effect = [
+        _make_response(payload={"result": "preview-id"}),
+        _make_response(payload={"result": "refine-id"}),
+    ]
+    session.get.side_effect = [
+        # preview poll: SUCCEEDED immediately
+        _make_response(payload={"status": "SUCCEEDED", "model_urls": {"glb": "p"}}),
+        # refine poll: SUCCEEDED immediately
+        _make_response(payload={
+            "status": "SUCCEEDED", "model_urls": {"glb": "https://e/r.glb"},
+        }),
+        # download GET
+        _make_response(content=b"\x00" * 100),
+    ]
+    client = MeshyClient(api_key="k", session=session, poll_interval_sec=0)
+    result = client.generate_text_to_model(prompt="rock", kind="rock", asset_id="r1")
+
+    # Two POSTs: preview + refine.
+    assert session.post.call_count == 2
+    # Job id records both stages.
+    assert "preview-id" in result.job_id and "refine-id" in result.job_id
+    # Downloaded the refine URL (last GET should be download).
+    download_url = session.get.call_args_list[-1][0][0]
+    assert download_url == "https://e/r.glb"
+
+
+def test_skip_refine_uses_preview_only(tmp_path, monkeypatch) -> None:
+    monkeypatch.setattr(common, "ASSETS_RAW_DIR", tmp_path / "raw")
+    monkeypatch.setattr(common, "API_CALLS_DIR", tmp_path / "calls")
+    monkeypatch.setattr(common, "METADATA_DIR", tmp_path / "meta")
+    monkeypatch.delenv("DRY_RUN", raising=False)
+
+    session = MagicMock()
+    session.post.side_effect = [_make_response(payload={"result": "preview-id"})]
+    session.get.side_effect = [
+        _make_response(payload={"status": "SUCCEEDED", "model_urls": {"glb": "https://e/p.glb"}}),
+        _make_response(content=b"\x00" * 50),
+    ]
+    client = MeshyClient(api_key="k", session=session, poll_interval_sec=0)
+    result = client.generate_text_to_model(
+        prompt="rock", kind="rock", asset_id="r2", skip_refine=True,
+    )
+    # Only one POST (preview); no refine.
+    assert session.post.call_count == 1
+    assert result.job_id == "preview-id"
+
+
 def test_dry_run_writes_minimal_glb_metadata_and_log(tmp_path, monkeypatch) -> None:
     monkeypatch.setattr(common, "ASSETS_RAW_DIR", tmp_path / "raw")
     monkeypatch.setattr(common, "API_CALLS_DIR", tmp_path / "calls")

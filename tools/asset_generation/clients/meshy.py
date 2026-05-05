@@ -70,6 +70,25 @@ class MeshyClient:
     def submit_text_to_3d_preview(self, prompt: str, **extra: Any) -> str:
         """POST /openapi/v2/text-to-3d (mode=preview). Returns task id from `result`."""
         body = {"mode": "preview", "prompt": prompt, **extra}
+        return self._submit(body)
+
+    def submit_text_to_3d_refine(self, preview_task_id: str, **extra: Any) -> str:
+        """POST /openapi/v2/text-to-3d (mode=refine).
+
+        Refine takes a successful preview's task_id and runs PBR texturing
+        on the geometry. Without this stage Meshy's preview output is a
+        pure-mesh GLB with no materials/textures (Godot renders it solid
+        white). Returns a NEW task_id for the refine job.
+        """
+        body = {
+            "mode": "refine",
+            "preview_task_id": preview_task_id,
+            "enable_pbr": True,
+            **extra,
+        }
+        return self._submit(body)
+
+    def _submit(self, body: dict[str, Any]) -> str:
         resp = self._session.post(
             f"{BASE_URL}{TEXT_TO_3D_PATH}",
             json=body,
@@ -126,7 +145,14 @@ class MeshyClient:
         kind: str,
         asset_id: str,
         extra_submit_kwargs: dict[str, Any] | None = None,
+        skip_refine: bool = False,
     ) -> GenerationResult:
+        """Submit preview -> wait -> submit refine -> wait -> download -> save.
+
+        Refine is required for textured output. Without it the GLB has
+        no materials and Godot renders the mesh as a solid white object.
+        Set skip_refine=True only for fast geometry-only iteration.
+        """
         request_id = new_request_id()
         submitted_at = utc_now_iso()
         out_path = asset_output_path(kind, asset_id)
@@ -139,7 +165,7 @@ class MeshyClient:
                 "dry_run", request_id, submitted_at, prompt, kind, asset_id,
                 status=200, latency_ms=0, job_id="DRY_RUN",
             )
-            self._write_metadata(asset_id, kind, prompt, request_id, "DRY_RUN", out_path, sha, len(payload))
+            self._write_metadata(asset_id, kind, prompt, request_id, "DRY_RUN", out_path, sha, len(payload), skip_refine)
             return GenerationResult(
                 asset_id=asset_id, service=self.name, output_path=out_path,
                 sha256=sha, bytes_size=len(payload), job_id="DRY_RUN",
@@ -147,22 +173,32 @@ class MeshyClient:
             )
 
         t0 = time.monotonic()
-        task_id = self.submit_text_to_3d_preview(prompt, **(extra_submit_kwargs or {}))
-        task = self.wait_for_completion(task_id)
-        glb_url = self.extract_glb_url(task)
+        preview_id = self.submit_text_to_3d_preview(prompt, **(extra_submit_kwargs or {}))
+        preview_task = self.wait_for_completion(preview_id)
+
+        if skip_refine:
+            final_task = preview_task
+            final_id = preview_id
+        else:
+            refine_id = self.submit_text_to_3d_refine(preview_id)
+            final_task = self.wait_for_completion(refine_id)
+            final_id = refine_id
+
+        glb_url = self.extract_glb_url(final_task)
         payload = self.download(glb_url)
         sha = sha256_bytes(payload)
         out_path.write_bytes(payload)
         latency_ms = int((time.monotonic() - t0) * 1000)
+        composite_job_id = final_id if skip_refine else f"{preview_id}->{final_id}"
         self._log(
             "submit", request_id, submitted_at, prompt, kind, asset_id,
-            status=200, latency_ms=latency_ms, job_id=task_id,
+            status=200, latency_ms=latency_ms, job_id=composite_job_id,
         )
-        self._write_metadata(asset_id, kind, prompt, request_id, task_id, out_path, sha, len(payload))
+        self._write_metadata(asset_id, kind, prompt, request_id, composite_job_id, out_path, sha, len(payload), skip_refine)
         return GenerationResult(
             asset_id=asset_id, service=self.name, output_path=out_path,
-            sha256=sha, bytes_size=len(payload), job_id=task_id,
-            request_id=request_id, raw_response=task,
+            sha256=sha, bytes_size=len(payload), job_id=composite_job_id,
+            request_id=request_id, raw_response=final_task,
         )
 
     def _log(self, log_kind: str, request_id: str, ts: str, prompt: str,
@@ -183,17 +219,19 @@ class MeshyClient:
         append_api_call_log(entry)
 
     def _write_metadata(self, asset_id: str, kind: str, prompt: str, request_id: str,
-                        job_id: str, out_path: Path, sha: str, size: int) -> None:
+                        job_id: str, out_path: Path, sha: str, size: int,
+                        skip_refine: bool = False) -> None:
+        model_id = "meshy:text-to-3d:preview" if skip_refine else "meshy:text-to-3d:preview+refine"
         write_metadata(
             asset_id,
             {
                 "id": asset_id,
                 "kind": kind,
                 "service": self.name,
-                "model": "meshy:text-to-3d:preview",
+                "model": model_id,
                 "prompt": prompt,
                 "seed": None,
-                "parameters": {},
+                "parameters": {"refine": not skip_refine, "enable_pbr": not skip_refine},
                 "license": "Meshy Pro plan terms — see docs/02_services/meshy.md §7",
                 "attribution": None,
                 "generated_at": utc_now_iso(),

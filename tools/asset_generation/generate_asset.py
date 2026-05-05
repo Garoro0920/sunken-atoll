@@ -52,6 +52,14 @@ def main(argv: list[str] | None = None) -> int:
             "Required when .env contains DRY_RUN=true (the safe default)."
         ),
     )
+    parser.add_argument(
+        "--skip-refine", action="store_true",
+        help=(
+            "Meshy only: stop after the preview stage (geometry only, no "
+            "PBR textures — render appears solid white in Godot). Use for "
+            "fast geometry iteration; default is preview+refine."
+        ),
+    )
     args = parser.parse_args(argv)
 
     if args.dry_run and args.live:
@@ -74,12 +82,19 @@ def main(argv: list[str] | None = None) -> int:
         import time
         time.sleep(1)
 
-    client = TripoClient() if args.service == "tripo" else MeshyClient()
-    result = client.generate_text_to_model(
-        prompt=args.prompt,
-        kind=args.kind,
-        asset_id=args.asset_id,
-    )
+    if args.service == "tripo":
+        client = TripoClient()
+        if args.skip_refine:
+            print("[note] --skip-refine ignored for Tripo (text_to_model is single-stage)")
+        result = client.generate_text_to_model(
+            prompt=args.prompt, kind=args.kind, asset_id=args.asset_id,
+        )
+    else:
+        client = MeshyClient()
+        result = client.generate_text_to_model(
+            prompt=args.prompt, kind=args.kind, asset_id=args.asset_id,
+            skip_refine=args.skip_refine,
+        )
 
     print(
         f"OK service={result.service} job={result.job_id} "
