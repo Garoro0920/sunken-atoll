@@ -1,0 +1,93 @@
+[gd_scene load_steps=10 format=3]
+
+; Bisect step 3: stranding_demo MINUS DemoHud (and minus the
+; StrandingDemo script that wires the HUD signals — replaced with
+; a stripped wiring script).
+;
+; If this renders, DemoHud (the CanvasLayer + its child labels) is
+; the cause of the "sky-blue only" symptom.
+; If this does NOT render, the cause is one of: WaterMesh, WaterField,
+; BuildingPlacement, StructuralIntegrity, Parts, the wiring script,
+; or some interaction between them.
+
+[ext_resource type="Script" path="res://scenes/levels/stranding/stranding_no_hud.gd" id="1_demo"]
+[ext_resource type="PackedScene" path="res://scenes/characters/player/player_character.tscn" id="2_player"]
+[ext_resource type="Script" path="res://src/gameplay/building/building_placement.gd" id="3_placement"]
+[ext_resource type="Script" path="res://src/gameplay/building/structural_integrity.gd" id="4_integrity"]
+[ext_resource type="Script" path="res://scenes/prototypes/floating/water_field.gd" id="5_field"]
+
+[sub_resource type="Environment" id="Environment_main"]
+background_mode = 1
+background_color = Color(0.55, 0.7, 0.85, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.85, 0.87, 0.92, 1)
+ambient_light_energy = 0.7
+tonemap_mode = 0
+glow_enabled = false
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_water"]
+size = Vector2(200, 200)
+subdivide_width = 8
+subdivide_depth = 8
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_water"]
+albedo_color = Color(0.18, 0.42, 0.55, 1)
+metallic = 0.0
+roughness = 0.45
+
+[sub_resource type="BoxMesh" id="BoxMesh_island"]
+size = Vector3(8, 1, 8)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_island"]
+size = Vector3(8, 1, 8)
+
+[node name="StrandingNoHud" type="Node3D"]
+script = ExtResource("1_demo")
+auto_grant_starter = true
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_main")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.707107, -0.707107, 0, 0.707107, 0.707107, 0, 30, 0)
+light_energy = 1.5
+shadow_enabled = false
+
+[node name="WaterField" type="Node" parent="."]
+script = ExtResource("5_field")
+
+[node name="WaterMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+mesh = SubResource("PlaneMesh_water")
+material_override = SubResource("StandardMaterial3D_water")
+
+[node name="Island" type="StaticBody3D" parent="."]
+
+[node name="IslandMesh" type="MeshInstance3D" parent="Island"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+mesh = SubResource("BoxMesh_island")
+
+[node name="IslandCollider" type="CollisionShape3D" parent="Island"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+shape = SubResource("BoxShape3D_island")
+
+[node name="Player" parent="." instance=ExtResource("2_player")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0, 0)
+
+[node name="StructuralIntegrity" type="Node" parent="."]
+script = ExtResource("4_integrity")
+
+[node name="BuildingPlacement" type="Node" parent="."]
+script = ExtResource("3_placement")
+snap_step_m = 1.0
+support_proximity_m = 5.0
+
+[node name="Parts" type="Node3D" parent="."]
+
+[node name="Camera3D" type="Camera3D" parent="."]
+; Same identity-basis camera as stranding_with_player (which worked).
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4, 15)
+current = true
+fov = 70.0
+near = 0.1
+far = 500.0
