@@ -1,0 +1,24 @@
+{
+  "id": "rock_real_001",
+  "kind": "rock",
+  "service": "tripo",
+  "model": "tripo:text_to_model",
+  "prompt": "weathered sea boulder, granite, cracked surface, low-poly",
+  "seed": null,
+  "parameters": {},
+  "license": "Tripo Pro plan terms — see docs/02_services/tripo.md §7",
+  "attribution": null,
+  "generated_at": "2026-05-05T13:47:46+00:00",
+  "input_files": [],
+  "output_files": [
+    "assets/raw/rock/rock_real_001.glb"
+  ],
+  "checksum": {
+    "algorithm": "sha256",
+    "value": "9aabce0dd423470d043f229405db32ce1a858489cbf2d335db201395834a7ccb",
+    "bytes": 15290752
+  },
+  "request_id": "19ea8d3ddbf74b8589b83c8b84b41846",
+  "job_id": "1d7b4d9a-3834-44d8-ba21-e73f091323a9",
+  "cost_estimate_usd": null
+}

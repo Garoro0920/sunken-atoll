@@ -29,6 +29,19 @@ import_first.log
 import*.log
 reports/
 
+# Asset generation pipeline runtime artifacts (per-developer, not project state):
+#   - DRY_RUN test outputs (48-byte placeholder GLBs)
+#   - daily JSONL API call logs (regenerate every run)
+# Real generated assets under assets/raw/ ARE committed (via LFS) — see
+# docs/03_workflows/asset_generation_workflow.md.
+assets/raw/**/*_dry_run*.glb
+assets/raw/**/*_dry_run_check*
+pipeline/api_calls/*.jsonl
+pipeline/api_calls/.gitkeep
+
+# Python test cache
+.pytest_cache/
+
 # Local secrets and environment overrides (per docs/02_services/secrets_management.md)
 .env
 .env.local
