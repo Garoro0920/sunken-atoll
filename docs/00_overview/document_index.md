@@ -17,6 +17,8 @@
 | SV-02 | `02_services/api_integration_guide.md` | サービス | API 統合方針 |
 | SV-03 | `02_services/secrets_management.md` | サービス | 認証情報管理 |
 | SV-04 | `02_services/version_policy.md` | サービス | バージョン採択方針 |
+| SV-05 | `02_services/tripo.md` | サービス | Tripo AI(L1 メッシュ主・L2 テクスチャ主・L4 Auto-Rig) |
+| SV-06 | `02_services/meshy.md` | サービス | Meshy AI(L1 メッシュ代替・L2 テクスチャ代替) |
 | WF-01 | `03_workflows/asset_generation_workflow.md` | 運用 | アセット生成 |
 | WF-02 | `03_workflows/scene_assembly_workflow.md` | 運用 | シーン構築 |
 | WF-03 | `03_workflows/testing_workflow.md` | 運用 | テスト |

@@ -62,6 +62,48 @@
 - マテリアルがすべて割り当たっていること
 - アニメーションが含まれる場合 RESET トラックがあること
 
+### 4.5 サービス個別ガイド
+
+- Tripo: `02_services/tripo.md`
+- Meshy: `02_services/meshy.md`
+
+採用決定の根拠と最初に固定すべきパラメータ(モデル名・credit 上限など)は `pipeline/decisions/2026-05-05_island_assets_meshy_tripo_adoption.md` を参照。
+
+### 4.6 島アセット取込(Sprint 2 以降)
+
+漂着島(`scenes/levels/stranding/stranding_demo.tscn` の長期版)で必要となる代表的アセットを、サービス選定の指針付きで列挙する。
+
+| アセット | 推奨サービス | 形式 | Godot インポート要点 |
+|---|---|---|---|
+| 大型ランドマーク岩・崖 | Tripo Refine | GLB | UV2 自動生成 ON、コリジョン用ローポリ別出力 |
+| 小型岩・砂利クラスタ(量産) | Meshy(Image to 3D + Refine) | GLB | UV2 自動生成 ON、LOD は Sprint 後半で対応 |
+| 流木・漂着デブリ | Meshy(Text to 3D) | GLB | UV2 自動生成 ON、衝突は trimesh で十分 |
+| 植生クラスタ(草・低木) | Meshy(Text to 3D, low-poly 指定) | GLB | アルファカット透過、両面描画(`cull_mode = 0`) |
+| 砂・岩地のシームレステクスチャ | Stability AI(タイル化対応設定) | PNG/EXR | sRGB / Linear 設定を Albedo / 他で分離(`asset_standards.md` §4.1) |
+| ホワイトボックスのリテクスチャ | Tripo Texturing(主要)/ Meshy Texture(副) | PBR セット | ORMMaterial3D で R=AO / G=Roughness / B=Metallic を採用 |
+| プレイヤー/NPC キャラ | Tripo(Image to Model + Auto-Rig) | GLB | Skeleton 命名統一、RESET トラック必須 |
+
+#### 標準フロー(島オブジェクト 1 件あたり)
+
+1. 仕様確定: `specs/features/` の該当節 or 本ワークフロー §3 [1] に従い、`name / kind / purpose / constraints` を `pipeline/prompts/<id>.json` に保存
+2. Tripo / Meshy の Draft で **構図・形状の合意** を取る(低コスト枠で複数バリエーション出し)
+3. 採用 1 案を Refine に昇格(必要時)。Refine は枠を消費するため事前に PO 承認(`05_claude_code/escalation_policy.md`)
+4. 受領 GLB を `assets/raw/<kind>/<id>.glb` に保存、SHA-256 チェックサム確認
+5. 必要時 Blender headless でリトポ・LOD・UV2 整え `assets/optimized/<kind>/<id>.glb`
+6. `res://assets/...` に配置 → `godot --headless --import` で再インポート
+7. メタデータ(prompt / seed / model / cost / license)を `pipeline/metadata/<id>.json` に記録
+8. `04_standards/quality_gates.md` のアセット閾値を通過するまでパラメータ調整 or 代替サービス
+
+#### 環境設定チェックリスト(初回起動時)
+
+- [ ] `MESHY_API_KEY` を OS シークレットストア + ローカル `.env` に登録(`02_services/secrets_management.md` §3、`.env.example` を `.env` にコピーして空欄を埋める)
+- [ ] `TRIPO_API_KEY` を同様に登録
+- [ ] `DRY_RUN=true` のままモック呼出で疎通確認(`02_services/api_integration_guide.md` §7)
+- [ ] `pipeline/api_calls/` ディレクトリの存在確認(無ければ作成)
+- [ ] `pipeline/metadata/` ディレクトリの存在確認(無ければ作成)
+- [ ] Pro プランの月間 credit / 同時ジョブ数を初回呼出時に計測し、`pipeline/decisions/` の利用初回ログに記録
+- [ ] 商用利用可否を Pro プランの当時の利用規約で確認、URL を decision log に転記
+
 ## 5. テクスチャ生成手順
 
 - 主用途: メッシュ補完、シームレスタイル、UI、デカール
