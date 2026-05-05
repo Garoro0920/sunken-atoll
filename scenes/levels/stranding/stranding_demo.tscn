@@ -56,13 +56,17 @@ auto_grant_starter = true
 environment = SubResource("Environment_main")
 
 [node name="Sun" type="DirectionalLight3D" parent="."]
-; Pitched 45 degrees down (north-tilted). Light direction = -basis.z =
-; (0, -0.707, -0.707), so it shines from above and slightly toward -Z,
-; lighting the +Y faces of every object in the scene. The previous
-; transform's basis.z component pushed light *upward* — combined with
-; ambient_light_source = DISABLED, that left the entire scene unlit
-; and indistinguishable from the sky-blue background.
-transform = Transform3D(1, 0, 0, 0, 0.707107, -0.707107, 0, 0.707107, 0.707107, 0, 30, 0)
+; Pitched 45 degrees down. DirectionalLight3D shines along -basis.z;
+; for light direction = (0, -0.707, -0.707) we need basis.z =
+; (0, 0.707, 0.707). .tscn Transform3D is ROW-MAJOR — the 12 floats
+; are matrix rows in order — so:
+;   row 0 = (basis.x.x, basis.y.x, basis.z.x) = (1, 0, 0)
+;   row 1 = (basis.x.y, basis.y.y, basis.z.y) = (0, 0.707, 0.707)
+;   row 2 = (basis.x.z, basis.y.z, basis.z.z) = (0, -0.707, 0.707)
+; The earlier transform had row 1 / row 2 Y/Z components swapped in
+; sign, which made the light shine UP instead of DOWN — the +Y
+; (top) faces of every object received zero direct light.
+transform = Transform3D(1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 30, 0)
 light_energy = 1.5
 ; Real-time directional shadows are a known per-frame jitter source
 ; on Compatibility renderer + small geometry; disabled for the demo.
