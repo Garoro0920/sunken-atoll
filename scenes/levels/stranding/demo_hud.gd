@@ -1,5 +1,5 @@
 class_name DemoHud
-extends CanvasLayer
+extends Control
 
 ## Minimal heads-up display for the Sprint 1 stranding demo.
 ##
@@ -7,6 +7,15 @@ extends CanvasLayer
 ## generates (build mode toggle, selected part cycling, focused
 ## interactable) so PO and Claude Code can verify input + system
 ## interaction without instrumenting the engine.
+##
+## Was originally `extends CanvasLayer` but on Godot 4.6.2 +
+## Compatibility renderer that combination caused the entire 3D
+## viewport to render only the WorldEnvironment background_color
+## (sky-blue, no geometry). Switching to a Control with full-rect
+## anchors + MOUSE_FILTER_IGNORE preserves the same visual layout
+## without disturbing the 3D viewport. The bisect chain
+## (stranding_minimal -> _with_player -> _no_hud) confirmed the
+## CanvasLayer-rooted HUD as the single cause.
 
 @onready var build_mode_label: Label = $MarginContainer/VBox/BuildModeLabel
 @onready var selected_part_label: Label = $MarginContainer/VBox/SelectedPartLabel
