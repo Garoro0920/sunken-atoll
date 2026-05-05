@@ -64,6 +64,32 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   # ----------------------------------------------------------------------------
+  # Job 1b: Python tools tests (asset generation clients).
+  # Runs in parallel with lint + import — no Godot dependency.
+  # ----------------------------------------------------------------------------
+  python_tools:
+    name: Python tools (asset generation clients)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6.0.2
+
+      - name: Set up Python
+        uses: actions/setup-python@v6.2.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+
+      - name: Install dev dependencies
+        run: pip install -r requirements-dev.txt
+
+      - name: Run pytest (DRY_RUN, no real API calls)
+        env:
+          DRY_RUN: 'true'
+        run: pytest -v
+
+  # ----------------------------------------------------------------------------
   # Job 2: Godot import validation (warnings = errors per quality_gates §9.1)
   # ----------------------------------------------------------------------------
   import:

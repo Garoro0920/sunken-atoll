@@ -1,0 +1,5 @@
+# Runtime dependencies for tools/ Python utilities (asset generation, etc.).
+# Per docs/02_services/version_policy.md §5: lock files pin dependency versions.
+# Test-only deps live in requirements-dev.txt.
+requests==2.32.3
+python-dotenv==1.0.1
