@@ -5,7 +5,9 @@
 
 ## チーム
 
-- Production: TBD(プロジェクト確定後に追記)
+- Production: Garoro0920(個人名義)
+  - 著作権者の正式表記は `LICENSE` を参照
+  - 確定経緯: `pipeline/decisions/2026-05-05_copyright_holder.md`
 
 ## 採用 OSS / ライブラリ
 

@@ -1,6 +1,6 @@
 SUNKEN ATOLL — PROPRIETARY LICENSE
 
-Copyright (c) 2026 [Copyright Holder TBD]
+Copyright (c) 2026 Garoro0920 (individual / personal name)
 
 All Rights Reserved.
 
@@ -35,15 +35,6 @@ and provenance metadata for generated assets are maintained at:
   - pipeline/metadata/<id>.json (per generated asset)
   - docs/07_governance/licensing.md (policy)
   - docs/07_governance/ip_policy.md (intellectual property handling)
-
-================================================================================
-PLACEHOLDER NOTICE
-================================================================================
-
-The "[Copyright Holder TBD]" placeholder above MUST be replaced with the
-legal entity or individual that holds copyright before any external
-distribution (including private alpha/beta releases). Replacement requires
-PO approval and a Decision Log entry under pipeline/decisions/.
 
 ================================================================================
 NO WARRANTY
