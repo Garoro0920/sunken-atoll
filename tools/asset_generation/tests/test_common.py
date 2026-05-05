@@ -40,9 +40,21 @@ def test_minimal_glb_is_deterministic() -> None:
     assert minimal_glb_bytes() == minimal_glb_bytes()
 
 
-def test_minimal_glb_is_48_bytes() -> None:
-    # 12 header + 8 chunk header + 28 padded JSON payload.
-    assert len(minimal_glb_bytes()) == 48
+def test_minimal_glb_is_96_bytes() -> None:
+    # 12 header + 8 chunk header + 76 padded JSON payload (scene+node).
+    # The empty-asset variant was 48 bytes but triggered a Godot import
+    # warning ("glTF file has no nodes"); the current variant adds a
+    # single empty scene+node so Godot imports silently.
+    assert len(minimal_glb_bytes()) == 96
+
+
+def test_minimal_glb_payload_includes_scene_and_node() -> None:
+    # Sanity check that the payload actually carries a scene reference,
+    # which is what suppresses the Godot import warning.
+    data = minimal_glb_bytes()
+    assert b'"scenes"' in data
+    assert b'"nodes"' in data
+    assert b'"scene":0' in data
 
 
 def test_sha256_returns_64_hex_chars() -> None:

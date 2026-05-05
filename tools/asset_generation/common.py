@@ -99,16 +99,26 @@ def load_dotenv_if_present() -> None:
 
 
 def minimal_glb_bytes() -> bytes:
-    """Return a 48-byte minimum valid GLB (glTF 2.0 binary).
+    """Return a minimum valid GLB (glTF 2.0 binary) with one empty scene+node.
 
     Used by DRY_RUN mode and tests as a deterministic placeholder that
-    downstream tools (Godot importer, Blender) accept without error.
+    downstream tools accept without warnings. The previous version was a
+    24-byte JSON body with no nodes; Godot 4.6's glTF importer warns
+    "This glTF file has no nodes, the generated Godot scene will be empty"
+    on those, which is true but spammy for a placeholder. Including a
+    single empty node makes Godot import silently.
+
     Layout per the glTF 2.0 binary spec:
       - 12-byte header: magic 'glTF', version 2 (uint32 LE), total length (uint32 LE)
       - 8-byte JSON chunk header: chunkLength (uint32 LE), type 'JSON'
       - JSON payload (padded to 4-byte multiple with ASCII spaces)
     """
-    json_payload = b'{"asset":{"version":"2.0"}}'
+    json_payload = (
+        b'{"asset":{"version":"2.0"},'
+        b'"scenes":[{"nodes":[0]}],'
+        b'"nodes":[{}],'
+        b'"scene":0}'
+    )
     pad_count = (4 - len(json_payload) % 4) % 4
     json_padded = json_payload + b" " * pad_count
     file_length = 12 + 8 + len(json_padded)
