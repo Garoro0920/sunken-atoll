@@ -1,0 +1,43 @@
+[gd_resource type="Resource" script_class="SurvivalBalance" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/gameplay/survival/survival_balance.gd" id="1_balance"]
+
+[resource]
+script = ExtResource("1_balance")
+hunger_decay_per_min = 0.5
+thirst_decay_per_min = 1.0
+oxygen_decay_per_min_when_diving = 10.0
+contamination_recovery_per_min = 0.2
+body_temp_delta_night = -1.0
+body_temp_delta_rain = -1.5
+body_temp_delta_storm = -3.0
+body_temp_delta_clear_day = 0.5
+body_temp_delta_fire_radius_m = 5.0
+hp_min = 0.0
+hp_max = 100.0
+hunger_min = 0.0
+hunger_max = 100.0
+hunger_lethal_threshold = 10.0
+thirst_min = 0.0
+thirst_max = 100.0
+thirst_lethal_threshold = 10.0
+body_temp_min = -100.0
+body_temp_max = 100.0
+body_temp_cold_threshold = -40.0
+body_temp_hot_threshold = 40.0
+body_temp_lethal_abs = 70.0
+oxygen_min = 0.0
+oxygen_max = 100.0
+oxygen_critical_threshold = 20.0
+contamination_min = 0.0
+contamination_max = 100.0
+contamination_warn_threshold = 50.0
+contamination_lethal_threshold = 70.0
+hp_damage_when_starving = 1.0
+hp_damage_when_dehydrated = 1.5
+hp_damage_when_extreme_temp = 0.8
+hp_damage_when_oxygen_zero = 30.0
+hp_damage_when_contaminated = 0.6
+move_speed_multiplier_when_hungry = 0.9
+stamina_recovery_multiplier_when_thirsty = 0.5
+stamina_max_multiplier_when_contaminated = 0.8
