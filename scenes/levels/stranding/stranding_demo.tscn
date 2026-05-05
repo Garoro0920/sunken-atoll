@@ -15,10 +15,15 @@
 ; and post-processing path are hardened.
 background_mode = 1
 background_color = Color(0.55, 0.7, 0.85, 1)
-ambient_light_source = 1
-ambient_light_color = Color(0.75, 0.78, 0.85, 1)
-ambient_light_energy = 0.4
-tonemap_mode = 2
+; ambient_light_source = 2 means COLOR (constant ambient). The previous
+; value 1 means DISABLED, which is why nothing rendered after the
+; renderer switch — the corrected sun direction provided directional
+; lighting only on +Y-facing faces, but with no ambient those faces
+; combined with an undersized energy still rendered close to background.
+ambient_light_source = 2
+ambient_light_color = Color(0.85, 0.87, 0.92, 1)
+ambient_light_energy = 0.7
+tonemap_mode = 0
 glow_enabled = false
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_water"]
@@ -51,8 +56,14 @@ auto_grant_starter = true
 environment = SubResource("Environment_main")
 
 [node name="Sun" type="DirectionalLight3D" parent="."]
-transform = Transform3D(0.866025, -0.353553, 0.353553, 0, 0.707107, 0.707107, -0.5, -0.612372, 0.612372, 0, 30, 0)
-light_energy = 1.0
+; Pitched 45 degrees down (north-tilted). Light direction = -basis.z =
+; (0, -0.707, -0.707), so it shines from above and slightly toward -Z,
+; lighting the +Y faces of every object in the scene. The previous
+; transform's basis.z component pushed light *upward* — combined with
+; ambient_light_source = DISABLED, that left the entire scene unlit
+; and indistinguishable from the sky-blue background.
+transform = Transform3D(1, 0, 0, 0, 0.707107, -0.707107, 0, 0.707107, 0.707107, 0, 30, 0)
+light_energy = 1.5
 ; Real-time directional shadows are a known per-frame jitter source
 ; on Compatibility renderer + small geometry; disabled for the demo.
 shadow_enabled = false

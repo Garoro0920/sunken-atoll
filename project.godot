@@ -31,7 +31,6 @@ window/size/viewport_width=1920
 window/size/viewport_height=1080
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
-window/vsync/vsync_mode=1
 
 [editor_plugins]
 
@@ -39,13 +38,5 @@ enabled=PackedStringArray("res://addons/gdUnit4/plugin.cfg")
 
 [rendering]
 
-; Switch to the Compatibility (OpenGL 3.3) backend. Forward+ on the
-; reporter's NVIDIA driver was producing reproducible full-screen
-; flicker that survived sky / glow / shadow / shader simplification;
-; the symptom is consistent with known Forward+ driver-interaction
-; issues. Compatibility renders a less feature-rich pipeline but
-; is significantly more stable across driver versions and is the
-; recommended fallback for desktops affected by Forward+ regressions.
-; Re-evaluate switching back when Sprint 2 water polish arrives.
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
