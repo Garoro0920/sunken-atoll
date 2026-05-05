@@ -37,6 +37,12 @@ script = ExtResource("3_inventory")
 script = ExtResource("4_input")
 
 [node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.866025, 0.5, 0, -0.5, 0.866025, 0, 5.5, 6.0)
+; 30-degree downward pitch, positioned above-behind for an over-the-shoulder
+; view that actually frames the player. Previous transform pitched UP by
+; mistake, leaving the camera staring at the sky and contributing to the
+; reported flicker.
+transform = Transform3D(1, 0, 0, 0, 0.866025, -0.5, 0, 0.5, 0.866025, 0, 5.0, 7.0)
 current = true
 fov = 70.0
+near = 0.1
+far = 500.0

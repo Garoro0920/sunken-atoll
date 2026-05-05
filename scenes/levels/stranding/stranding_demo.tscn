@@ -5,8 +5,6 @@
 [ext_resource type="Script" path="res://src/gameplay/building/building_placement.gd" id="3_placement"]
 [ext_resource type="Script" path="res://src/gameplay/building/structural_integrity.gd" id="4_integrity"]
 [ext_resource type="Script" path="res://scenes/prototypes/floating/water_field.gd" id="5_field"]
-[ext_resource type="Shader" path="res://resources/shaders/water/water_surface.gdshader" id="6_water_shader"]
-[ext_resource type="Resource" path="res://resources/materials/water/preset_shallow.tres" id="7_water_mat"]
 [ext_resource type="Script" path="res://scenes/levels/stranding/demo_hud.gd" id="8_hud"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sky"]
@@ -23,12 +21,23 @@ background_mode = 2
 sky = SubResource("Sky_main")
 ambient_light_source = 3
 tonemap_mode = 2
-glow_enabled = true
+glow_enabled = false
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_water"]
 size = Vector2(200, 200)
-subdivide_width = 200
-subdivide_depth = 200
+subdivide_width = 8
+subdivide_depth = 8
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_water"]
+; Plain opaque water for the Sprint 1 demo. The custom Gerstner-wave
+; shader (resources/shaders/water/water_surface.gdshader) had transparency
+; + DEPTH_TEXTURE-based depth fade that interacted poorly with Forward+
+; rendering, surfacing as full-screen flicker. The shader is preserved
+; for the prototype and for Sprint 2's water polish work; the demo uses
+; this simple material until the shader path is hardened.
+albedo_color = Color(0.18, 0.42, 0.55, 1)
+metallic = 0.0
+roughness = 0.45
 
 [sub_resource type="BoxMesh" id="BoxMesh_island"]
 size = Vector3(8, 1, 8)
@@ -52,9 +61,12 @@ shadow_enabled = true
 script = ExtResource("5_field")
 
 [node name="WaterMesh" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0)
+; Lowered to y=-0.5 (was -0.1). With the island top at y=0 and the box
+; physics depth tolerance, anything within ~0.2 m of the island top can
+; still surface flicker artifacts when the camera rakes the horizon.
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
 mesh = SubResource("PlaneMesh_water")
-material_override = ExtResource("7_water_mat")
+material_override = SubResource("StandardMaterial3D_water")
 
 [node name="Island" type="StaticBody3D" parent="."]
 
