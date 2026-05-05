@@ -47,6 +47,14 @@ func _ready() -> void:
 		# Use a member assignment (not setter) so listeners don't fire on
 		# initialization.
 		available_parts = T1PartCatalog.ALL_IDS.duplicate()
+	# Fallback: when the controller is a direct child of a PlayerCharacter
+	# and the .tscn export wiring didn't resolve (Godot 4.6 sometimes
+	# leaves typed-Node @export NodePath assignments unresolved at scene
+	# instantiation time), pick the parent up automatically.
+	if player == null:
+		var parent: Node = get_parent()
+		if parent is PlayerCharacter:
+			player = parent as PlayerCharacter
 
 
 func _process(_delta: float) -> void:

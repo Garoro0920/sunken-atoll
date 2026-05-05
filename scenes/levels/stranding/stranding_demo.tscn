@@ -51,6 +51,7 @@ shadow_enabled = true
 script = ExtResource("5_field")
 
 [node name="WaterMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0)
 mesh = SubResource("PlaneMesh_water")
 material_override = ExtResource("7_water_mat")
 
