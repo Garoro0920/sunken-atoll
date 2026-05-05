@@ -43,7 +43,9 @@ func _ready() -> void:
 func _integrate_forces(state: PhysicsDirectBodyState3D) -> void:
 	if _water_field == null:
 		return
-	var transform := state.transform
+	# Renamed from `transform` to avoid shadowing Node3D.transform
+	# (SHADOWED_VARIABLE_BASE_CLASS warning at parse time).
+	var body_transform := state.transform
 	var total_force := Vector3.ZERO
 	var total_torque := Vector3.ZERO
 
@@ -57,7 +59,7 @@ func _integrate_forces(state: PhysicsDirectBodyState3D) -> void:
 			var local := Vector3(
 				-sample_extents.x + float(i) * step_x, 0.0, -sample_extents.z + float(j) * step_z
 			)
-			var world_pos: Vector3 = transform * local
+			var world_pos: Vector3 = body_transform * local
 			var water_y: float = _water_field.call("get_water_height", world_pos)
 			var depth: float = water_y - world_pos.y
 			if depth <= 0.0:
@@ -69,7 +71,7 @@ func _integrate_forces(state: PhysicsDirectBodyState3D) -> void:
 			var force_mag: float = GRAVITY * per_sample_volume * 1000.0 * submerged_fraction
 			var sample_force := Vector3.UP * force_mag
 			total_force += sample_force
-			total_torque += (world_pos - transform.origin).cross(sample_force)
+			total_torque += (world_pos - body_transform.origin).cross(sample_force)
 
 	state.apply_central_force(total_force)
 	state.apply_torque(total_torque)

@@ -92,6 +92,27 @@ shape = SubResource("BoxShape3D_island")
 [node name="Player" parent="." instance=ExtResource("2_player")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0, 0)
 
+[node name="Camera3D" parent="Player"]
+; Disabled in favor of DemoCamera (level-parented, fixed world position)
+; while we diagnose why nothing rendered besides sky-blue. The player
+; camera will be re-enabled (or replaced with a CameraRig) once the
+; baseline rendering is confirmed working.
+current = false
+
+[node name="DemoCamera" type="Camera3D" parent="."]
+; Diagnostic camera attached directly to the level (not the player).
+; If this renders the scene but the player camera does not, the issue
+; is with the player's camera configuration rather than the renderer
+; or scene contents. Position chosen to look at player + island center.
+; basis: 30 deg downward pitch (same as player camera).
+; origin (0, 6, 7) — same world position the player camera was at
+;   (player at (0,1,0) + camera local (0,5,7)).
+transform = Transform3D(1, 0, 0, 0, 0.866025, -0.5, 0, 0.5, 0.866025, 0, 6.0, 7.0)
+current = true
+fov = 70.0
+near = 0.1
+far = 500.0
+
 [node name="StructuralIntegrity" type="Node" parent="."]
 script = ExtResource("4_integrity")
 
