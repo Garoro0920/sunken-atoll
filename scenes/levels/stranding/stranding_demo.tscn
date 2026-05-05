@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene load_steps=14 format=3]
 
 [ext_resource type="Script" path="res://scenes/levels/stranding/stranding_demo.gd" id="1_demo"]
 [ext_resource type="PackedScene" path="res://scenes/characters/player/player_character.tscn" id="2_player"]
@@ -6,7 +6,9 @@
 [ext_resource type="Script" path="res://src/gameplay/building/structural_integrity.gd" id="4_integrity"]
 [ext_resource type="Script" path="res://scenes/prototypes/floating/water_field.gd" id="5_field"]
 [ext_resource type="ShaderMaterial" path="res://resources/materials/water/preset_shallow.tres" id="6_water_mat"]
-[ext_resource type="Script" path="res://scenes/levels/stranding/demo_hud.gd" id="8_hud"]
+[ext_resource type="PackedScene" path="res://assets/raw/rock/rock_real_001.glb" id="7_rock_tripo"]
+[ext_resource type="PackedScene" path="res://assets/raw/rock/rock_meshy_001.glb" id="8_rock_meshy"]
+[ext_resource type="Script" path="res://scenes/levels/stranding/demo_hud.gd" id="9_hud"]
 
 [sub_resource type="Environment" id="Environment_main"]
 ; Solid colour background. The procedural sky was disabled in the
@@ -102,6 +104,20 @@ support_proximity_m = 5.0
 
 [node name="Parts" type="Node3D" parent="."]
 
+[node name="RockTripo" parent="Island" instance=ExtResource("7_rock_tripo")]
+; First real Tripo-generated asset (job 1d7b4d9a-...). Placed above the
+; island top at scale 1.0 — the exporter doesn't guarantee a specific
+; world-unit scale, so PO will need to eyeball-tune translation/scale
+; in the editor once the import settles. Position chosen to be visible
+; from the player's first-person spawn (looks down -Z from world ~1.5y).
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.0, 0.5, -3.0)
+
+[node name="RockMeshy" parent="Island" instance=ExtResource("8_rock_meshy")]
+; First real Meshy-preview asset (job 019df865-...). Same caveats as
+; RockTripo. Placed on the opposite side of the island for visual
+; comparison between the two services.
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, 0.5, 1.5)
+
 [node name="DemoHud" type="Control" parent="."]
 ; Was CanvasLayer; switched to Control because CanvasLayer + child Control
 ; on Godot 4.6.2 + Compatibility renderer caused the entire 3D viewport
@@ -112,7 +128,7 @@ support_proximity_m = 5.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
-script = ExtResource("8_hud")
+script = ExtResource("9_hud")
 
 [node name="MarginContainer" type="MarginContainer" parent="DemoHud"]
 layout_mode = 1
