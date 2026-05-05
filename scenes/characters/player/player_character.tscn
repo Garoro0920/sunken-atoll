@@ -1,8 +1,9 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://src/gameplay/player/player_character.gd" id="1_player"]
 [ext_resource type="Script" path="res://src/gameplay/survival/survival_manager.gd" id="2_survival"]
 [ext_resource type="Script" path="res://src/gameplay/inventory/inventory.gd" id="3_inventory"]
+[ext_resource type="Script" path="res://src/gameplay/player/player_input_controller.gd" id="4_input"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
 radius = 0.4
@@ -31,3 +32,12 @@ script = ExtResource("2_survival")
 
 [node name="Inventory" type="Node" parent="."]
 script = ExtResource("3_inventory")
+
+[node name="PlayerInputController" type="Node" parent="."]
+script = ExtResource("4_input")
+player = NodePath("..")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.866025, 0.5, 0, -0.5, 0.866025, 0, 5.5, 6.0)
+current = true
+fov = 70.0

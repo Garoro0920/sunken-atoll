@@ -16,10 +16,11 @@ const PRESET_PATHS := {
 @export var water_mesh_path: NodePath
 @export var initial_preset: String = "shallow"
 
-@onready var _water_mesh: MeshInstance3D = get_node(water_mesh_path)
-
+# prvvars before onreadyprvvars per .gdlintrc class-definitions-order.
 var _current_preset: String = ""
 var _storm_intensity: float = 0.0
+
+@onready var _water_mesh: MeshInstance3D = get_node(water_mesh_path)
 
 
 func _ready() -> void:
@@ -51,9 +52,15 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	var key := event as InputEventKey
 	match key.keycode:
-		KEY_1: apply_preset("shallow")
-		KEY_2: apply_preset("urban")
-		KEY_3: apply_preset("ruins")
-		KEY_4: apply_preset("deep")
-		KEY_BRACKETLEFT: set_storm_intensity(_storm_intensity - 0.1)
-		KEY_BRACKETRIGHT: set_storm_intensity(_storm_intensity + 0.1)
+		KEY_1:
+			apply_preset("shallow")
+		KEY_2:
+			apply_preset("urban")
+		KEY_3:
+			apply_preset("ruins")
+		KEY_4:
+			apply_preset("deep")
+		KEY_BRACKETLEFT:
+			set_storm_intensity(_storm_intensity - 0.1)
+		KEY_BRACKETRIGHT:
+			set_storm_intensity(_storm_intensity + 0.1)

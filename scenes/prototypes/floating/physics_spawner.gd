@@ -10,7 +10,9 @@ extends Node3D
 @export var water_field_path: NodePath
 @export var register_with_integrity: bool = true
 
-@onready var _integrity: StructuralIntegrity = get_node_or_null("../StructuralIntegrity") as StructuralIntegrity
+@onready var _integrity: StructuralIntegrity = (
+	get_node_or_null("../StructuralIntegrity") as StructuralIntegrity
+)
 
 
 func _ready() -> void:

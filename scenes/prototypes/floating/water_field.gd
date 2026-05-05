@@ -33,7 +33,9 @@ func get_water_height(world_pos: Vector3) -> float:
 	return y
 
 
-func _gerstner_y(pos: Vector3, dir_unnorm: Vector2, amplitude: float, wave_length: float, t: float) -> float:
+func _gerstner_y(
+	pos: Vector3, dir_unnorm: Vector2, amplitude: float, wave_length: float, t: float
+) -> float:
 	var dir: Vector2 = dir_unnorm.normalized()
 	var k: float = TAU / max(wave_length, 0.001)
 	var c: float = sqrt(GRAVITY_C / k)
