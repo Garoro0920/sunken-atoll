@@ -4,6 +4,12 @@
 # Godot translation binaries (auto-generated from .csv)
 *.translation
 
+# Editor addons (each contributor installs the version pinned in
+# docs/02_services/version_policy.md §9.1; CI downloads its own copy
+# via the gdunit4-action input). See pipeline/decisions/2026-05-05_gdunit4_version_correction.md
+# for adoption strategy follow-up.
+addons/
+
 # Mono / .NET artifacts (only relevant if C# is adopted)
 .mono/
 data_*/

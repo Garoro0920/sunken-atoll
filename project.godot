@@ -1,24 +1,22 @@
 ; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
 ;
-; Project configuration is intentionally minimal here.
-; - The exact engine version is fixed at the CI / dev tooling layer
-;   per docs/02_services/version_policy.md (NOT in this file).
-; - Renderer / physics / quality settings will be set after the
-;   technology selection ADR is recorded (see specs/game_design_document.md §9).
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
 
 config_version=5
+
+[animation]
+
+compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 
 [application]
 
 config/name="Sunken Atoll"
 config/description="Cooperative multiplayer survival in a flooded world. See specs/game_design_document.md."
-config/features=PackedStringArray("4.0")
-run/main_scene=""
-
-[autoload]
-
-; Autoloads (singletons) will be added per docs/04_standards/scene_standards.md §9.
-; Examples planned: EventBus, GameState, SceneRouter, AudioMaster, Logger.
+config/features=PackedStringArray("4.6")
 
 [display]
 
@@ -27,18 +25,6 @@ window/size/viewport_height=1080
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 
-[rendering]
+[editor_plugins]
 
-; Renderer selection is deferred to the prototyping phase.
-; See specs/features/water_shader.md §7 (Forward+ vs Mobile decision).
-
-[physics]
-
-; Physics engine selection is deferred to the prototyping phase.
-; Candidate: Jolt (see specs/game_design_document.md §7.5).
-common/physics_ticks_per_second=60
-3d/physics_engine="DEFAULT"
-
-[input]
-
-; Input map will be defined under resources/input_maps/ per docs/04_standards/scene_standards.md.
+enabled=PackedStringArray("res://addons/gdUnit4/plugin.cfg")

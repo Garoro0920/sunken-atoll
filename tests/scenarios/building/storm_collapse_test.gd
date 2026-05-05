@@ -10,7 +10,7 @@ extends Node
 
 const TEST_SCENE := "res://scenes/prototypes/floating/floating_physics_test.tscn"
 const STORM_DURATION_SEC := 300  # 5 minutes
-const TICK_BUDGET_MS := 16.67   # 60 Hz physics tick budget
+const TICK_BUDGET_MS := 16.67  # 60 Hz physics tick budget
 
 
 func _ready() -> void:

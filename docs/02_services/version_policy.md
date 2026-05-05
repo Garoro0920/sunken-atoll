@@ -84,7 +84,7 @@
 | LLM | Claude モデル ID(主) | claude-opus-4-7 | 2026-05-05 | https://docs.anthropic.com/ | コード生成・オーケスト・主要 NPC |
 | LLM | Claude Vision モデル | claude-opus-4-7(マルチモーダル) | 2026-05-05 | 同上 | スクショ視覚回帰判定 |
 | LLM | Claude モデル ID(廉価系候補) | 未確定(実装時) | — | — | コスト計測後に Sonnet/Haiku 採否決定 |
-| テスト | GdUnit4 | v5.0.4 | 2026-05-05 | https://github.com/MikeSchulze/gdUnit4/releases | **v6.0.x は Godot 4.5 専用で互換切れ — 採用禁止** |
+| テスト | GdUnit4 | v6.1.3 | 2026-05-05 | https://github.com/godot-gdunit-labs/gdUnit4/releases | gdUnit4-action 公式互換性マトリクスで Godot 4.6.x は v6.1.x が必要(v5.0.x は 4.3〜4.4 専用、v6.0.x は 4.5 専用)。`pipeline/decisions/2026-05-05_gdunit4_version_correction.md` 参照 |
 | 監視 | Sentry Godot SDK | 1.6.0 | 2026-05-05 | https://github.com/getsentry/sentry-godot | Win/Linux/macOS/Android/iOS 対応 |
 
 ### 9.2 周辺基盤(B 群)
@@ -95,7 +95,7 @@
 | Python | Python | 3.12.x(マイナーは ローカル `.python-version` で固定) | 2026-05-05 | https://www.python.org/downloads/ | パイプラインスクリプト用 |
 | Node | Node.js | 20.x LTS | 2026-05-05 | https://nodejs.org/ | MCP / 配布 CLI 用 |
 | CI | GitHub Actions Runner OS | ubuntu-latest / windows-latest / macos-latest | 2026-05-05 | https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners | 標準 Hosted Runner |
-| CI | gdunit4-action | 未確定(実装時) | — | https://github.com/MikeSchulze/gdUnit4-action | GdUnit4 v5.0.4 互換版を採用 |
+| CI | gdunit4-action | @v1(rolling) | 2026-05-05 | https://github.com/MikeSchulze/gdUnit4-action | GdUnit4 v6.1.3 を `version` 入力で指定 |
 | 配布 | butler | rolling(broth から `LATEST` 取得、≥ 2026-01-28) | 2026-05-05 | https://github.com/itchio/butler | itch.io 公式推奨方式 |
 | 配布 | steamcmd | rolling | 2026-05-05 | https://developer.valvesoftware.com/wiki/SteamCMD | Valve はバージョン管理しない |
 

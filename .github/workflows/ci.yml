@@ -8,7 +8,7 @@ on:
 env:
   # Per docs/02_services/version_policy.md §9.1
   GODOT_VERSION: 4.6.2
-  GDUNIT4_VERSION: v5.0.4
+  GDUNIT4_VERSION: v6.1.3
   PYTHON_VERSION: '3.12'
 
 concurrency:

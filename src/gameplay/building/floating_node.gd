@@ -55,9 +55,7 @@ func _integrate_forces(state: PhysicsDirectBodyState3D) -> void:
 	for i in SAMPLE_GRID_SIDE:
 		for j in SAMPLE_GRID_SIDE:
 			var local := Vector3(
-				-sample_extents.x + float(i) * step_x,
-				0.0,
-				-sample_extents.z + float(j) * step_z
+				-sample_extents.x + float(i) * step_x, 0.0, -sample_extents.z + float(j) * step_z
 			)
 			var world_pos: Vector3 = transform * local
 			var water_y: float = _water_field.call("get_water_height", world_pos)
@@ -65,7 +63,9 @@ func _integrate_forces(state: PhysicsDirectBodyState3D) -> void:
 			if depth <= 0.0:
 				continue
 			# Submerged. Apply buoyancy force at this sample point.
-			var submerged_fraction: float = clampf(depth / max(sample_extents.y * 2.0, 0.5), 0.0, 1.0)
+			var submerged_fraction: float = clampf(
+				depth / max(sample_extents.y * 2.0, 0.5), 0.0, 1.0
+			)
 			var force_mag: float = GRAVITY * per_sample_volume * 1000.0 * submerged_fraction
 			var sample_force := Vector3.UP * force_mag
 			total_force += sample_force

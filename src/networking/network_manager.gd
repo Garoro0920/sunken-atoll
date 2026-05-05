@@ -14,10 +14,10 @@ signal connected_to_server
 signal connection_failed
 signal server_disconnected
 
+enum Backend { ENET, STEAM }
+
 const DEFAULT_PORT: int = 4242
 const MAX_PLAYERS: int = 4  # MVP per multiplayer_session.md §3.2
-
-enum Backend { ENET, STEAM }
 
 var backend: Backend = Backend.ENET
 var connected_peers: Array[int] = []

@@ -66,14 +66,15 @@ func _measure_preset(name: String) -> void:
 	var avg_fps := 1000.0 / max(avg_ms, 0.001)
 	var one_pct_low_fps := 1000.0 / max(p99_ms, 0.001)
 
-	_results.append({
+	var entry := {
 		"preset": name,
 		"frames_measured": MEASURE_FRAMES,
 		"avg_frame_ms": avg_ms,
 		"p99_frame_ms": p99_ms,
 		"avg_fps": avg_fps,
 		"one_percent_low_fps": one_pct_low_fps,
-	})
+	}
+	_results.append(entry)
 
 
 func _write_report() -> void:
@@ -82,11 +83,13 @@ func _write_report() -> void:
 	if f == null:
 		push_error("Cannot write benchmark report: %s" % path)
 		return
-	f.store_string(JSON.stringify({
+	var doc := {
 		"version": 1,
 		"scene": TEST_SCENE,
 		"results": _results,
-	}, "\t"))
+	}
+	var json_text := JSON.stringify(doc, "\t")
+	f.store_string(json_text)
 	f.close()
 	print("Benchmark written to: %s" % path)
 
